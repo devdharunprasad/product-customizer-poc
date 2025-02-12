@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Konva from 'konva';
 import { v4 as uuidv4 } from 'uuid';
-
 const TShirtEditor: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
   const [printingType, setPrintingType] = useState<'DTG' | 'Puff'>('DTG');
   const [color, setColor] = useState<string>('white');
-  const [view, setView] = useState<'Front' | 'Back' | 'Left Sleeve' | 'Right Sleeve'>('Front');
+  const [view, setView] = useState<'Front' | 'Back'>('Front');
   const [elements, setElements] = useState<{ id: string, type: 'text' | 'image', node: Konva.Node }[]>([]);
-
+  const [rows, setRows] = useState<number>(20);
+  const [columns, setColumns] = useState<number>(16);
+  const [dragRect, setDragRect] = useState<{ x: number, y: number }>({ x: 300, y: 400 });
+  const transformerRef = useRef<Konva.Transformer | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
     if (!stageRef.current) return;
     const stage = new Konva.Stage({
@@ -20,7 +23,6 @@ const TShirtEditor: React.FC = () => {
     const layer = new Konva.Layer();
     stage.add(layer);
     layerRef.current = layer;
-
     const imageObj = new window.Image();
     imageObj.src = view === 'Front' ? '/src/assets/Group 1000002904.png' : 'path_to_back_tshirt_image.png';
     imageObj.onload = () => {
@@ -32,14 +34,12 @@ const TShirtEditor: React.FC = () => {
         height: 500,
       });
       layer.add(tshirtImage);
-
-      const gridWidth = 200 / 16;
-      const gridHeight = 300 / 20;
-      const offsetX = (500 - 200) / 2;  // Centering the grid horizontally
-      const offsetY = (500 - 300) / 2;  // Centering the grid vertically
-
-      for (let i = 0; i < 16; i++) {
-        for (let j = 0; j < 20; j++) {
+      const gridWidth = 200 / columns;
+      const gridHeight = 300 / rows;
+      const offsetX = (500 - 200) / 2;
+      const offsetY = (500 - 300) / 2;
+      for (let i = 0; i < columns; i++) {
+        for (let j = 0; j < rows; j++) {
           const rect = new Konva.Rect({
             x: offsetX + i * gridWidth,
             y: offsetY + j * gridHeight,
@@ -51,12 +51,36 @@ const TShirtEditor: React.FC = () => {
           layer.add(rect);
         }
       }
+      const dragHandle = new Konva.Rect({
+        x: dragRect.x,
+        y: dragRect.y,
+        width: 10,
+        height: 10,
+        fill: 'blue',
+        draggable: true,
+        dragBoundFunc: (pos) => {
+          const newX = Math.max(pos.x, offsetX + 200);
+          const newY = Math.max(pos.y, offsetY + 300);
+          return { x: newX, y: newY };
+        },
+      });
+      dragHandle.on('dragmove', (e) => {
+        const newCols = Math.ceil((e.target.x() - offsetX) / gridWidth);
+        const newRows = Math.ceil((e.target.y() - offsetY) / gridHeight);
+        setColumns(newCols);
+        setRows(newRows);
+        setDragRect({ x: e.target.x(), y: e.target.y() });
+      });
+      layer.add(dragHandle);
+      const transformer = new Konva.Transformer();
+      layer.add(transformer);
+      transformerRef.current = transformer;
       layer.draw();
     };
-  }, [view]);
+  }, [view, columns, rows]);
 
   const addText = () => {
-    if (!layerRef.current) return;
+    if (!layerRef.current || !transformerRef.current) return;
     const text = new Konva.Text({
       x: 150,
       y: 200,
@@ -65,19 +89,102 @@ const TShirtEditor: React.FC = () => {
       draggable: true,
       fill: 'black',
     });
+    text.on('transform', () => {
+      text.setAttrs({
+        width: text.width() * text.scaleX(),
+        height: text.height() * text.scaleY(),
+        scaleX: 1,
+        scaleY: 1,
+      });
+    });
+    text.on('dblclick', () => {
+      const textPosition = text.getClientRect();
+      const areaPosition = {
+        x: textPosition.x + stageRef.current!.getBoundingClientRect().left,
+        y: textPosition.y + stageRef.current!.getBoundingClientRect().top,
+      };
+      const textArea = textAreaRef.current!;
+      textArea.value = text.text();
+      textArea.style.position = 'absolute';
+      textArea.style.top = areaPosition.y + 'px';
+      textArea.style.left = areaPosition.x + 'px';
+      textArea.style.width = text.width() - text.padding() * 2 + 'px';
+      textArea.style.height = text.height() - text.padding() * 2 + 'px';
+      textArea.style.fontSize = text.fontSize() + 'px';
+      textArea.style.border = 'none';
+      textArea.style.padding = '0px';
+      textArea.style.margin = '0px';
+      textArea.style.overflow = 'hidden';
+      textArea.style.background = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.resize = 'none';
+      textArea.style.lineHeight = text.lineHeight().toString();
+      textArea.style.fontFamily = text.fontFamily();
+      textArea.style.transformOrigin = 'left top';
+      textArea.style.textAlign = text.align();
+      textArea.style.color = text.fill() as string;
+      textArea.style.transform = `rotateZ(${text.rotation()}deg) translateY(-2px)`;
+      textArea.style.display = 'block';
+      textArea.focus();
+      textArea.addEventListener('keydown', (e) => {
+        if (e.keyCode === 13) {
+          text.text(textArea.value);
+          textArea.style.display = 'none';
+        }
+      });
+      textArea.addEventListener('blur', () => {
+        text.text(textArea.value);
+        textArea.style.display = 'none';
+      });
+    });
     layerRef.current.add(text);
     setElements([...elements, { id: uuidv4(), type: 'text', node: text }]);
     layerRef.current.draw();
+    transformerRef.current.nodes([text]);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => { if (!event.target.files || !layerRef.current) return; const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === 'string') { Konva.Image.fromURL(reader.result, (img) => { img.setAttrs({ x: 0, y: 0, width: 500, height: 500, draggable: true, name: 'uploadedImage', }); layerRef.current?.add(img); setElements([...elements, { id: uuidv4(), type: 'image', node: img }]); layerRef.current?.draw(); }); } }; reader.readAsDataURL(file); } };
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || !layerRef.current || !transformerRef.current) return;
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          Konva.Image.fromURL(reader.result, (img) => {
+            img.setAttrs({
+              x: 150,
+              y: 150,
+              width: 200,
+              height: 200,
+              draggable: true,
+            });
+            img.on('transform', () => {
+              img.setAttrs({
+                width: img.width() * img.scaleX(),
+                height: img.height() * img.scaleY(),
+                scaleX: 1,
+                scaleY: 1,
+              });
+            });
+            layerRef.current?.add(img);
+            setElements([...elements, { id: uuidv4(), type: 'image', node: img }]);
+            layerRef.current?.draw();
+            if (transformerRef.current) {
+              transformerRef.current.nodes([img]);
+            }
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const exportDesign = () => {
     if (!layerRef.current) return;
     const dataURL = layerRef.current.getStage().toDataURL();
     const link = document.createElement('a');
     link.href = dataURL;
-    link.download = 'tshirt-design.png';
+    link.download =  'tshirt-design.png';
     link.click();
   };
   return (
