@@ -34,8 +34,8 @@ const TShirtEditor: React.FC = () => {
         height: 500,
       });
       layer.add(tshirtImage);
-      const gridWidth = 200 / columns;
-      const gridHeight = 300 / rows;
+      const gridWidth = 204 / columns;
+      const gridHeight = 255 / rows;
       const offsetX = (500 - 200) / 2;
       const offsetY = (500 - 300) / 2;
       for (let i = 0; i < columns; i++) {
