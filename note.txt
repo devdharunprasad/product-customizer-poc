@@ -2,12 +2,12 @@
 
 
 TODO
-* Build the UI around
-* Bring x and y axis aligner lines on the customiser
-* the design border should be alined with the grid line automatically if brought near.
-* + should be changed to spinning symbol, while roatating.
-* Design should be fixed straight if its almost to angle with 4 side angles.
-* Export the test illustration from the figma file.
+* Build the UI around the customiser
+- Bring x and y axis aligner lines on the customiser
+- the design border should be alined with the grid line automatically if brought near.
+- + should be changed to spinning symbol, while roatating.
+- Design should be fixed straight if its almost to angle with 4 side angles.
+* Export the test illustration mockup from the figma file for product image.
 
 
 
