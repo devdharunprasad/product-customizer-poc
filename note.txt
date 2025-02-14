@@ -1,6 +1,4 @@
 1 box => 12.75px => 1 inch (Can use 12.75/10, final calculation can be done with x10)
-
-
 TODO
 * Build the UI around the customiser
 - Bring x and y axis aligner lines on the customiser
@@ -8,13 +6,9 @@ TODO
 - + should be changed to spinning symbol, while roatating.
 - Design should be fixed straight if its almost to angle with 4 side angles.
 * Export the test illustration mockup from the figma file for product image.
-
-
-
 Note:
 The number of boxes will change between each product but the size of each boxes of a grid will be the same.
 Between each variant s,m,xl the box size will be reduced accordingly but the num of boxes still remains the same.
-
 Image size
 Grid positioning
 Grid size
