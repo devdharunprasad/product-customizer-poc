@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 const TShirtEditor: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
-  // const [printingType, setPrintingType] = useState<"DTG" | "Puff">("DTG");
   const [color, setColor] = useState<string>("white");
   const [view, setView] = useState<"Front side" | "Back Side">("Front side");
   const [elements, setElements] = useState<
@@ -88,61 +87,44 @@ const TShirtEditor: React.FC = () => {
     };
   }, [view, columns, rows]);
   const addText = () => {
-    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;
-
+    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;  
     const text = new Konva.Text({
-        x: 150,
-        y: 200,
-        text: "Click to edit",
-        fontSize: 30,
-        draggable: true,
-        fill: "black",
+      x: 150,
+      y: 200,
+      text: "Click to edit",
+      fontSize: 30,
+      draggable: true,
+      fill: "black",
     });
-    const stage = stageRef.current;
-    const verticalLine = new Konva.Line({
-        points: [text.x(), 0, text.x(), stage.clientHeight],
-        stroke: "red",
-        strokeWidth: 1,
-        dash: [4, 4],
-        visible: false,
-    });
-    const horizontalLine = new Konva.Line({
-        points: [0, text.y(), stage.clientWidth, text.y()],
-        stroke: "red",
-        strokeWidth: 1,
-        dash: [4, 4],
-        visible: false,
-    });
-    layerRef.current.add(verticalLine, horizontalLine, text);
+  
+    const layer = layerRef.current;
+    const gridLeft = (500 - 200) / 2; // Offset X
+    const gridTop = (500 - 300) / 2; // Offset Y
+    const gridRight = gridLeft + 204; // Right boundary
+    const gridBottom = gridTop + 255; // Bottom boundary
+    
     text.on("dragmove", () => {
-        const textPosition = text.getClientRect();
-        const tolerance = 10;
-        const stageCenterX = stage.clientWidth / 2;
-        const stageCenterY = stage.clientHeight / 2;
-        if (Math.abs(textPosition.x - stageCenterX) < tolerance) {
-            verticalLine.show();
-        } else {
-            verticalLine.hide();
-        }
-        if (Math.abs(textPosition.y - stageCenterY) < tolerance) {
-            horizontalLine.show();
-        } else {
-            horizontalLine.hide();
-        }
-        layerRef.current?.batchDraw();
+      const textBounds = text.getClientRect();
+  
+      // Check if the entire text is outside the grid boundaries
+      const isFullyOutside =
+        textBounds.x + textBounds.width < gridLeft || // Completely left
+        textBounds.x > gridRight || // Completely right
+        textBounds.y + textBounds.height < gridTop || // Completely above
+        textBounds.y > gridBottom; // Completely below
+  
+      text.visible(!isFullyOutside); // Hide if fully outside
+      layer.batchDraw();
     });
-    text.on("dragend", () => {
-        verticalLine.hide();
-        horizontalLine.hide();
-        layerRef.current?.batchDraw();
-    });
-    setElements((prev) => [...prev, { id: uuidv4(), type: "text", node: text }]);    
-    transformerRef.current.nodes([...transformerRef.current.nodes(), text]);    
-    layerRef.current.draw();
-};
+  
+    layer.add(text);
+    setElements((prev) => [...prev, { id: uuidv4(), type: "text", node: text }]);
+    transformerRef.current.nodes([...transformerRef.current.nodes(), text]);
+    layer.draw();
+  };  
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || !layerRef.current || !transformerRef.current)
-      return;
+      return;  
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -155,7 +137,7 @@ const TShirtEditor: React.FC = () => {
               width: 200,
               height: 200,
               draggable: true,
-            });
+            });  
             img.on("transform", () => {
               img.setAttrs({
                 width: img.width() * img.scaleX(),
@@ -164,12 +146,23 @@ const TShirtEditor: React.FC = () => {
                 scaleY: 1,
               });
             });
+            const gridLeft = (500 - 200) / 2; // Offset X
+            const gridTop = (500 - 300) / 2; // Offset Y
+            const gridRight = gridLeft + 204; // Right boundary
+            const gridBottom = gridTop + 255; // Bottom boundary
+            img.on("dragmove", () => {
+              const imgBounds = img.getClientRect();  
+              const isFullyOutside =
+                imgBounds.x + imgBounds.width < gridLeft || // Fully left
+                imgBounds.x > gridRight || // Fully right
+                imgBounds.y + imgBounds.height < gridTop || // Fully above
+                imgBounds.y > gridBottom; // Fully below  
+              img.visible(!isFullyOutside); // Hide if fully outside
+              layerRef.current?.batchDraw();
+            });  
             layerRef.current?.add(img);
-            setElements([
-              ...elements,
-              { id: uuidv4(), type: "image", node: img },
-            ]);
-            layerRef.current?.draw();
+            setElements([...elements, { id: uuidv4(), type: "image", node: img }]);
+            layerRef.current?.draw();  
             if (transformerRef.current) {
               transformerRef.current.nodes([img]);
             }
@@ -178,7 +171,7 @@ const TShirtEditor: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
+  };  
   const exportDesign = () => {
     if (!layerRef.current) return;
     const dataURL = layerRef.current.getStage().toDataURL();
@@ -227,7 +220,8 @@ const TShirtEditor: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex-1 p-8">          
+        <div className="flex-1 p-8">
+          
           <div>
             <label>Color:</label>
             {["white", "blue", "red", "orange", "gray", "black"].map((c) => (
