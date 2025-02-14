@@ -87,7 +87,8 @@ const TShirtEditor: React.FC = () => {
     };
   }, [view, columns, rows]);
   const addText = () => {
-    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;  
+    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;
+  
     const text = new Konva.Text({
       x: 150,
       y: 200,
@@ -95,31 +96,73 @@ const TShirtEditor: React.FC = () => {
       fontSize: 30,
       draggable: true,
       fill: "black",
-    });  
-    const layer = layerRef.current;
+    });
+  
+    // Grid boundaries
     const gridLeft = (500 - 200) / 2; // Offset X
     const gridTop = (500 - 300) / 2; // Offset Y
     const gridRight = gridLeft + 204; // Right boundary
-    const gridBottom = gridTop + 255; // Bottom boundary    
+    const gridBottom = gridTop + 255; // Bottom boundary
+  
+    const layer = layerRef.current;
+  
+    // Create X and Y axis guide lines within the grid
+    const xAxis = new Konva.Line({
+      points: [gridLeft, text.y(), gridRight, text.y()],
+      stroke: "blue",
+      strokeWidth: 1,
+      dash: [5, 5],
+      listening: false,
+    });
+  
+    const yAxis = new Konva.Line({
+      points: [text.x(), gridTop, text.x(), gridBottom],
+      stroke: "blue",
+      strokeWidth: 1,
+      dash: [5, 5],
+      listening: false,
+    });
+  
+    layer.add(xAxis, yAxis);
+  
+    text.on("mouseover", () => {
+      document.body.style.cursor = "move";
+    });
+  
+    text.on("mouseout", () => {
+      document.body.style.cursor = "default";
+    });
+  
     text.on("dragmove", () => {
-      const textBounds = text.getClientRect();      
+      const textBounds = text.getClientRect();
       let newX = text.x();
-      let newY = text.y();    
+      let newY = text.y();
+  
+      // Ensure the text stays within the grid boundaries
       if (textBounds.x < gridLeft) newX = gridLeft;
       if (textBounds.x + textBounds.width > gridRight) newX = gridRight - textBounds.width;
       if (textBounds.y < gridTop) newY = gridTop;
-      if (textBounds.y + textBounds.height > gridBottom) newY = gridBottom - textBounds.height;    
-      text.position({ x: newX, y: newY });    
+      if (textBounds.y + textBounds.height > gridBottom) newY = gridBottom - textBounds.height;
+  
+      text.position({ x: newX, y: newY });
+  
+      // Update axis positions
+      xAxis.points([gridLeft, newY + text.height() / 2, gridRight, newY + text.height() / 2]);
+      yAxis.points([newX + text.width() / 2, gridTop, newX + text.width() / 2, gridBottom]);
+  
       layer.batchDraw();
     });
+  
     layer.add(text);
     setElements((prev) => [...prev, { id: uuidv4(), type: "text", node: text }]);
+  
     transformerRef.current.nodes([...transformerRef.current.nodes(), text]);
     layer.draw();
-  };  
+  };
+  
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || !layerRef.current || !transformerRef.current)
-      return;  
+    if (!event.target.files || !layerRef.current || !transformerRef.current) return;
+    
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -132,7 +175,33 @@ const TShirtEditor: React.FC = () => {
               width: 200,
               height: 200,
               draggable: true,
-            });  
+            });
+  
+            // Define grid boundaries
+            const gridLeft = (500 - 200) / 2;  // 150
+            const gridTop = (500 - 300) / 2;   // 100
+            const gridRight = gridLeft + 204;  // 354
+            const gridBottom = gridTop + 255;  // 355
+  
+            // Create clipped axis lines
+            const xAxis = new Konva.Line({
+              points: [gridLeft, img.y() + img.height() / 2, gridRight, img.y() + img.height() / 2],
+              stroke: 'blue',
+              strokeWidth: 1,
+              dash: [5, 5],
+              listening: false,
+            });
+  
+            const yAxis = new Konva.Line({
+              points: [img.x() + img.width() / 2, gridTop, img.x() + img.width() / 2, gridBottom],
+              stroke: 'blue',
+              strokeWidth: 1,
+              dash: [5, 5],
+              listening: false,
+            });
+  
+            layerRef.current?.add(xAxis, yAxis);
+  
             img.on("transform", () => {
               img.setAttrs({
                 width: img.width() * img.scaleX(),
@@ -140,27 +209,49 @@ const TShirtEditor: React.FC = () => {
                 scaleX: 1,
                 scaleY: 1,
               });
+              updateAxes();
             });
-            const gridLeft = (500 - 200) / 2; // Offset X
-            const gridTop = (500 - 300) / 2; // Offset Y
-            const gridRight = gridLeft + 204; // Right boundary
-            const gridBottom = gridTop + 255; // Bottom boundary
+  
             img.on("dragmove", () => {
-              const imgBounds = img.getClientRect();      
+              const imgBounds = img.getClientRect();
               let newX = img.x();
-              let newY = img.y();    
+              let newY = img.y();
+  
+              // Ensure the image stays within the grid
               if (imgBounds.x < gridLeft) newX = gridLeft;
               if (imgBounds.x + imgBounds.width > gridRight) newX = gridRight - imgBounds.width;
               if (imgBounds.y < gridTop) newY = gridTop;
-              if (imgBounds.y + imgBounds.height > gridBottom) newY = gridBottom - imgBounds.height;    
-              img.position({ x: newX, y: newY });    
-              if (layerRef.current) {
-                layerRef.current.batchDraw();
-              }
+              if (imgBounds.y + imgBounds.height > gridBottom) newY = gridBottom - imgBounds.height;
+  
+              img.position({ x: newX, y: newY });
+  
+              updateAxes();
+              layerRef.current?.batchDraw();
             });
+  
+            img.on("click", () => {
+              transformerRef.current?.nodes([img]);
+              layerRef.current?.batchDraw();
+            });
+  
+            img.on("mouseover", () => (document.body.style.cursor = "move"));
+            img.on("mouseout", () => (document.body.style.cursor = "default"));
+  
+            function updateAxes() {
+              const centerX = img.x() + img.width() / 2;
+              const centerY = img.y() + img.height() / 2;
+  
+              // Ensure the lines are within the grid
+              xAxis.points([gridLeft, Math.min(Math.max(centerY, gridTop), gridBottom), gridRight, Math.min(Math.max(centerY, gridTop), gridBottom)]);
+              yAxis.points([Math.min(Math.max(centerX, gridLeft), gridRight), gridTop, Math.min(Math.max(centerX, gridLeft), gridRight), gridBottom]);
+  
+              layerRef.current?.batchDraw();
+            }
+  
             layerRef.current?.add(img);
             setElements([...elements, { id: uuidv4(), type: "image", node: img }]);
-            layerRef.current?.draw();  
+            layerRef.current?.draw();
+  
             if (transformerRef.current) {
               transformerRef.current.nodes([img]);
             }
@@ -169,7 +260,7 @@ const TShirtEditor: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
-  };  
+  };
   const exportDesign = () => {
     if (!layerRef.current) return;
     const dataURL = layerRef.current.getStage().toDataURL();
