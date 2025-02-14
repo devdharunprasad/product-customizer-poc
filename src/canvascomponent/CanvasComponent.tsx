@@ -95,28 +95,23 @@ const TShirtEditor: React.FC = () => {
       fontSize: 30,
       draggable: true,
       fill: "black",
-    });
-  
+    });  
     const layer = layerRef.current;
     const gridLeft = (500 - 200) / 2; // Offset X
     const gridTop = (500 - 300) / 2; // Offset Y
     const gridRight = gridLeft + 204; // Right boundary
-    const gridBottom = gridTop + 255; // Bottom boundary
-    
+    const gridBottom = gridTop + 255; // Bottom boundary    
     text.on("dragmove", () => {
-      const textBounds = text.getClientRect();
-  
-      // Check if the entire text is outside the grid boundaries
-      const isFullyOutside =
-        textBounds.x + textBounds.width < gridLeft || // Completely left
-        textBounds.x > gridRight || // Completely right
-        textBounds.y + textBounds.height < gridTop || // Completely above
-        textBounds.y > gridBottom; // Completely below
-  
-      text.visible(!isFullyOutside); // Hide if fully outside
+      const textBounds = text.getClientRect();      
+      let newX = text.x();
+      let newY = text.y();    
+      if (textBounds.x < gridLeft) newX = gridLeft;
+      if (textBounds.x + textBounds.width > gridRight) newX = gridRight - textBounds.width;
+      if (textBounds.y < gridTop) newY = gridTop;
+      if (textBounds.y + textBounds.height > gridBottom) newY = gridBottom - textBounds.height;    
+      text.position({ x: newX, y: newY });    
       layer.batchDraw();
     });
-  
     layer.add(text);
     setElements((prev) => [...prev, { id: uuidv4(), type: "text", node: text }]);
     transformerRef.current.nodes([...transformerRef.current.nodes(), text]);
@@ -151,15 +146,18 @@ const TShirtEditor: React.FC = () => {
             const gridRight = gridLeft + 204; // Right boundary
             const gridBottom = gridTop + 255; // Bottom boundary
             img.on("dragmove", () => {
-              const imgBounds = img.getClientRect();  
-              const isFullyOutside =
-                imgBounds.x + imgBounds.width < gridLeft || // Fully left
-                imgBounds.x > gridRight || // Fully right
-                imgBounds.y + imgBounds.height < gridTop || // Fully above
-                imgBounds.y > gridBottom; // Fully below  
-              img.visible(!isFullyOutside); // Hide if fully outside
-              layerRef.current?.batchDraw();
-            });  
+              const imgBounds = img.getClientRect();      
+              let newX = img.x();
+              let newY = img.y();    
+              if (imgBounds.x < gridLeft) newX = gridLeft;
+              if (imgBounds.x + imgBounds.width > gridRight) newX = gridRight - imgBounds.width;
+              if (imgBounds.y < gridTop) newY = gridTop;
+              if (imgBounds.y + imgBounds.height > gridBottom) newY = gridBottom - imgBounds.height;    
+              img.position({ x: newX, y: newY });    
+              if (layerRef.current) {
+                layerRef.current.batchDraw();
+              }
+            });
             layerRef.current?.add(img);
             setElements([...elements, { id: uuidv4(), type: "image", node: img }]);
             layerRef.current?.draw();  
