@@ -5,12 +5,16 @@ import "./tshirt.css";
 import { v4 as uuidv4 } from "uuid";
 const TShirtEditor: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
+  
   const layerRef = useRef<Konva.Layer | null>(null);
   const [color, setColor] = useState<string>("white");
   const [view, setView] = useState<"Front side" | "Back Side">("Front side");
-  const [elements, setElements] = useState<
-    { id: string; type: "text" | "image"; node: Konva.Node }[]
-  >([]);
+  const [textElements, setTextElements] = useState<
+  { id: string; node: Konva.Text }[]
+>([]);
+const [imageElements, setImageElements] = useState<
+  { id: string; node: Konva.Image }[]
+>([]);
   const [rows, setRows] = useState<number>(20);
   const [columns, setColumns] = useState<number>(16);
   const [dragRect, setDragRect] = useState<{ x: number; y: number }>({
@@ -46,8 +50,8 @@ const TShirtEditor: React.FC = () => {
       const gridHeight = 255 / rows;
       const offsetX = (500 - 200) / 2;
       const offsetY = (500 - 300) / 2;
-      for (let i = 0; i < columns; i++) {
-        for (let j = 0; j < rows; j++) {
+      for (let  i = 0; i < columns; i++) {
+        for (let  j = 0; j < rows; j++) {
           const rect = new Konva.Rect({
             x: offsetX + i * gridWidth,
             y: offsetY + j * gridHeight,
@@ -86,181 +90,277 @@ const TShirtEditor: React.FC = () => {
       layer.draw();
     };
   }, [view, columns, rows]);
-  const addText = () => {
-    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;
-  
+  const addText = () => {    
+    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;      
+    
     const text = new Konva.Text({
       x: 150,
       y: 200,
       text: "Click to edit",
-      fontSize: 30,
+      fontSize: 20,
       draggable: true,
       fill: "black",
     });
-  
-    // Grid boundaries
-    const gridLeft = (500 - 200) / 2; // Offset X
-    const gridTop = (500 - 300) / 2; // Offset Y
-    const gridRight = gridLeft + 204; // Right boundary
-    const gridBottom = gridTop + 255; // Bottom boundary
-  
+    text.on('transform', function () {
+      // reset scale, so only with is changing by transformer
+      text.setAttrs({
+        width: text.width() * text.scaleX(),
+        scaleX: 1,
+      });
+    });
+
+ 
     const layer = layerRef.current;
-  
-    // Create X and Y axis guide lines within the grid
+    const stage = layer?.getStage();
+    // T-shirt image boundaries (assuming fixed dimensions)
+    const tshirtX = (500 - 200) / 2;  // X position of T-shirt image
+    const tshirtY = (500 - 300) / 2;  // Y position of T-shirt image
+    const tshirtWidth = 204;          // Width of T-shirt image
+    const tshirtHeight = 255;         // Height of T-shirt image
+
+    // Create X and Y axis guide lines (full canvas span)
     const xAxis = new Konva.Line({
-      points: [gridLeft, text.y(), gridRight, text.y()],
+      points: [0, text.y() + text.height() / 2, 500, text.y() + text.height() / 2], 
       stroke: "blue",
       strokeWidth: 1,
       dash: [5, 5],
       listening: false,
+      visible: false,
     });
-  
+
     const yAxis = new Konva.Line({
-      points: [text.x(), gridTop, text.x(), gridBottom],
+      points: [text.x() + text.width() / 2, 0, text.x() + text.width() / 2, 500], 
       stroke: "blue",
       strokeWidth: 1,
       dash: [5, 5],
       listening: false,
+      visible: false,
     });
-  
+
     layer.add(xAxis, yAxis);
-  
+    text.on("click", () => {
+      xAxis.visible(true);
+      yAxis.visible(true);
+      transformerRef.current?.nodes([text]);
+      layer?.batchDraw();
+    });
+    // Cursor change on hover
     text.on("mouseover", () => {
       document.body.style.cursor = "move";
     });
-  
+
     text.on("mouseout", () => {
       document.body.style.cursor = "default";
     });
-  
+
+    // Select text when clicked
+    text.on("click", (e) => {
+      e.cancelBubble = true;
+      transformerRef.current?.nodes([text]);
+      layerRef.current?.batchDraw();
+    });
+    text.on('transform', function () {
+      text.setAttrs({
+          width: text.width() * text.scaleX(),
+          scaleX: 1,
+      });
+  });
+  const editText = () => {
+      const textPosition = text.getAbsolutePosition();
+      const stageBox = stage.container().getBoundingClientRect();
+
+      const textarea = document.createElement("textarea");
+      document.body.appendChild(textarea);
+
+      textarea.value = text.text();
+      textarea.style.position = "absolute";
+      textarea.style.top = `${textPosition.y + stageBox.top}px`;
+      textarea.style.left = `${textPosition.x + stageBox.left}px`;
+      textarea.style.width = `${text.width()}px`;
+      textarea.style.height = `${text.height()}px`;
+      textarea.style.fontSize = `${text.fontSize()}px`;
+      textarea.style.border = "none";
+      textarea.style.padding = "5px";
+      textarea.style.margin = "0";
+      textarea.style.outline = "none";
+      textarea.style.resize = "none";
+      textarea.style.background = "transparent";
+      textarea.style.overflow = "hidden";
+      textarea.style.fontFamily = text.fontFamily();
+
+      textarea.focus();
+
+      textarea.addEventListener("blur", () => {
+          text.text(textarea.value);
+          document.body.removeChild(textarea);
+          layer.batchDraw();
+      });
+
+      textarea.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+              event.preventDefault();
+              text.text(textarea.value);
+              document.body.removeChild(textarea);
+              layer.batchDraw();
+          }
+      });
+  };
+
+  text.on("dblclick", editText);
+
+
+    // Restrict text drag within the T-shirt image
     text.on("dragmove", () => {
-      const textBounds = text.getClientRect();
-      let newX = text.x();
-      let newY = text.y();
-  
-      // Ensure the text stays within the grid boundaries
-      if (textBounds.x < gridLeft) newX = gridLeft;
-      if (textBounds.x + textBounds.width > gridRight) newX = gridRight - textBounds.width;
-      if (textBounds.y < gridTop) newY = gridTop;
-      if (textBounds.y + textBounds.height > gridBottom) newY = gridBottom - textBounds.height;
-  
+      const newX = Math.max(tshirtX, Math.min(text.x(), tshirtX + tshirtWidth - text.width()));
+      const newY = Math.max(tshirtY, Math.min(text.y(), tshirtY + tshirtHeight - text.height()));
+
       text.position({ x: newX, y: newY });
-  
-      // Update axis positions
-      xAxis.points([gridLeft, newY + text.height() / 2, gridRight, newY + text.height() / 2]);
-      yAxis.points([newX + text.width() / 2, gridTop, newX + text.width() / 2, gridBottom]);
-  
+
+      // Update guide lines based on text center
+      xAxis.points([0, newY + text.height() / 2, 500, newY + text.height() / 2]);
+      yAxis.points([newX + text.width() / 2, 0, newX + text.width() / 2, 500]);
+
       layer.batchDraw();
     });
-  
+    stage?.on("click", (e) => {
+      if (e.target !== text) {
+        xAxis.visible(false);
+        yAxis.visible(false);
+        transformerRef.current?.nodes([]);
+        layer?.batchDraw();
+      }
+    });
+
     layer.add(text);
-    setElements((prev) => [...prev, { id: uuidv4(), type: "text", node: text }]);
-  
+    setTextElements((prev) => [...prev, { id: uuidv4(), node: text }]);
     transformerRef.current.nodes([...transformerRef.current.nodes(), text]);
     layer.draw();
-  };
-  
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || !layerRef.current || !transformerRef.current) return;
-    
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          Konva.Image.fromURL(reader.result, (img) => {
-            img.setAttrs({
-              x: 150,
-              y: 150,
-              width: 200,
-              height: 200,
-              draggable: true,
-            });
-  
-            // Define grid boundaries
-            const gridLeft = (500 - 200) / 2;  // 150
-            const gridTop = (500 - 300) / 2;   // 100
-            const gridRight = gridLeft + 204;  // 354
-            const gridBottom = gridTop + 255;  // 355
-  
-            // Create clipped axis lines
-            const xAxis = new Konva.Line({
-              points: [gridLeft, img.y() + img.height() / 2, gridRight, img.y() + img.height() / 2],
-              stroke: 'blue',
-              strokeWidth: 1,
-              dash: [5, 5],
-              listening: false,
-            });
-  
-            const yAxis = new Konva.Line({
-              points: [img.x() + img.width() / 2, gridTop, img.x() + img.width() / 2, gridBottom],
-              stroke: 'blue',
-              strokeWidth: 1,
-              dash: [5, 5],
-              listening: false,
-            });
-  
-            layerRef.current?.add(xAxis, yAxis);
-  
-            img.on("transform", () => {
-              img.setAttrs({
-                width: img.width() * img.scaleX(),
-                height: img.height() * img.scaleY(),
-                scaleX: 1,
-                scaleY: 1,
-              });
-              updateAxes();
-            });
-  
-            img.on("dragmove", () => {
-              const imgBounds = img.getClientRect();
-              let newX = img.x();
-              let newY = img.y();
-  
-              // Ensure the image stays within the grid
-              if (imgBounds.x < gridLeft) newX = gridLeft;
-              if (imgBounds.x + imgBounds.width > gridRight) newX = gridRight - imgBounds.width;
-              if (imgBounds.y < gridTop) newY = gridTop;
-              if (imgBounds.y + imgBounds.height > gridBottom) newY = gridBottom - imgBounds.height;
-  
-              img.position({ x: newX, y: newY });
-  
-              updateAxes();
-              layerRef.current?.batchDraw();
-            });
-  
-            img.on("click", () => {
-              transformerRef.current?.nodes([img]);
-              layerRef.current?.batchDraw();
-            });
-  
-            img.on("mouseover", () => (document.body.style.cursor = "move"));
-            img.on("mouseout", () => (document.body.style.cursor = "default"));
-  
-            function updateAxes() {
-              const centerX = img.x() + img.width() / 2;
-              const centerY = img.y() + img.height() / 2;
-  
-              // Ensure the lines are within the grid
-              xAxis.points([gridLeft, Math.min(Math.max(centerY, gridTop), gridBottom), gridRight, Math.min(Math.max(centerY, gridTop), gridBottom)]);
-              yAxis.points([Math.min(Math.max(centerX, gridLeft), gridRight), gridTop, Math.min(Math.max(centerX, gridLeft), gridRight), gridBottom]);
-  
-              layerRef.current?.batchDraw();
-            }
-  
-            layerRef.current?.add(img);
-            setElements([...elements, { id: uuidv4(), type: "image", node: img }]);
-            layerRef.current?.draw();
-  
-            if (transformerRef.current) {
-              transformerRef.current.nodes([img]);
-            }
-          });
+};
+
+const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  if (!event.target.files || !layerRef.current || !transformerRef.current) return;
+
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (typeof reader.result === "string") {
+      Konva.Image.fromURL(reader.result, (img) => {
+        img.setAttrs({
+          x: 150,
+          y: 150,
+          width: 200,
+          height: 200,
+          draggable: true,
+        });
+
+        const layer = layerRef.current;
+        const stage = layer?.getStage();
+
+        // T-shirt image boundaries
+        const tshirtX = (500 - 200) / 2;
+        const tshirtY = (500 - 300) / 2;
+        const tshirtWidth = 204;
+        const tshirtHeight = 255;
+
+        // Create X and Y axis guide lines
+        const xAxis = new Konva.Line({
+          points: [0, img.y() + img.height() / 2, 500, img.y() + img.height() / 2],
+          stroke: "blue",
+          strokeWidth: 1,
+          dash: [5, 5],
+          listening: false,
+          name: "axis",
+          visible: false, // Initially hidden
+        });
+
+        const yAxis = new Konva.Line({
+          points: [img.x() + img.width() / 2, 0, img.x() + img.width() / 2, 500],
+          stroke: "blue",
+          strokeWidth: 1,
+          dash: [5, 5],
+          listening: false,
+          name: "axis",
+          visible: false, // Initially hidden
+        });
+
+        layer?.add(xAxis, yAxis);
+
+        function updateAxes() {
+          const centerX = img.x() + img.width() / 2;
+          const centerY = img.y() + img.height() / 2;
+
+          xAxis.points([0, centerY, 500, centerY]);
+          yAxis.points([centerX, 0, centerX, 500]);
+
+          layer?.batchDraw();
         }
-      };
-      reader.readAsDataURL(file);
+
+        img.on("dragmove", () => {
+          const newX = Math.max(tshirtX, Math.min(img.x(), tshirtX + tshirtWidth - img.width()));
+          const newY = Math.max(tshirtY, Math.min(img.y(), tshirtY + tshirtHeight - img.height()));
+
+          img.position({ x: newX, y: newY });
+
+          updateAxes();
+          layer?.batchDraw();
+        });
+
+        img.on("transform", () => {
+          const newWidth = img.width() * img.scaleX();
+          const newHeight = img.height() * img.scaleY();
+
+          const newX = Math.max(tshirtX, Math.min(img.x(), tshirtX + tshirtWidth - newWidth));
+          const newY = Math.max(tshirtY, Math.min(img.y(), tshirtY + tshirtHeight - newHeight));
+
+          img.setAttrs({
+            width: newWidth,
+            height: newHeight,
+            scaleX: 1,
+            scaleY: 1,
+            x: newX,
+            y: newY,
+          });
+
+          updateAxes();
+          layer?.batchDraw();
+        });
+
+        // Show axes when image is clicked
+        img.on("click", () => {
+          xAxis.visible(true);
+          yAxis.visible(true);
+          transformerRef.current?.nodes([img]);
+          layer?.batchDraw();
+        });
+
+        // Hide axes when clicking outside the image
+        stage?.on("click", (e) => {
+          if (e.target !== img) {
+            xAxis.visible(false);
+            yAxis.visible(false);
+            transformerRef.current?.nodes([]);
+            layer?.batchDraw();
+          }
+        });
+
+        img.on("mouseover", () => (document.body.style.cursor = "move"));
+        img.on("mouseout", () => (document.body.style.cursor = "default"));
+
+        layer?.add(img);
+        setImageElements((prev) => [...prev, { id: uuidv4(), node: img }]);
+        layer?.draw();
+
+        if (transformerRef.current) {
+          transformerRef.current.nodes([img]);
+        }
+      });
     }
   };
+  reader.readAsDataURL(file);
+};
+
   const exportDesign = () => {
     if (!layerRef.current) return;
     const dataURL = layerRef.current.getStage().toDataURL();
