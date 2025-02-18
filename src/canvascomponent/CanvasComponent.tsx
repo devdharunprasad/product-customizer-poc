@@ -1,42 +1,44 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef} from "react";
 import { BoxSelect, Database, Image, Link, Tag, Type } from "lucide-react";
 import Konva from "konva";
 import "./tshirt.css";
 import { v4 as uuidv4 } from "uuid";
+import useTShirtStore from "../store/useTShirtStore";
 const TShirtEditor: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
   
   const layerRef = useRef<Konva.Layer | null>(null);
-  const [color, setColor] = useState<string>("white");
-  const [view, setView] = useState<"Front side" | "Back Side">("Front side");
-  const [textElements, setTextElements] = useState<
-  { id: string; node: Konva.Text }[]
->([]);
-const [imageElements, setImageElements] = useState<
-  { id: string; node: Konva.Image }[]
->([]);
-  const [rows, setRows] = useState<number>(20);
-  const [columns, setColumns] = useState<number>(16);
-  const [dragRect, setDragRect] = useState<{ x: number; y: number }>({
-    x: 300,
-    y: 400,
-  });
+  const {
+    color,
+    view,
+    setColor,
+    setView,
+    addTextElement,
+    addImageElement,
+  } = useTShirtStore();
+
+  const rows:number= 20
+  const columns:number =16
   const transformerRef = useRef<Konva.Transformer | null>(null);
   useEffect(() => {
     if (!stageRef.current) return;
+  
     const stage = new Konva.Stage({
       container: stageRef.current,
       width: 500,
       height: 500,
     });
+  
     const layer = new Konva.Layer();
     stage.add(layer);
     layerRef.current = layer;
+  
     const imageObj = new window.Image();
     imageObj.src =
       view === "Front side"
         ? "/src/assets/Group 1000002904.png"
         : "path_to_back_tshirt_image.png";
+  
     imageObj.onload = () => {
       const tshirtImage = new Konva.Image({
         image: imageObj,
@@ -45,13 +47,18 @@ const [imageElements, setImageElements] = useState<
         width: 500,
         height: 500,
       });
+  
       layer.add(tshirtImage);
+  
+      // Grid Calculation
       const gridWidth = 204 / columns;
       const gridHeight = 255 / rows;
       const offsetX = (500 - 200) / 2;
       const offsetY = (500 - 300) / 2;
-      for (let  i = 0; i < columns; i++) {
-        for (let  j = 0; j < rows; j++) {
+  
+      // Draw the grid (fixed, not draggable)
+      for (let i = 0; i < columns; i++) {
+        for (let j = 0; j < rows; j++) {
           const rect = new Konva.Rect({
             x: offsetX + i * gridWidth,
             y: offsetY + j * gridHeight,
@@ -63,53 +70,31 @@ const [imageElements, setImageElements] = useState<
           layer.add(rect);
         }
       }
-      const dragHandle = new Konva.Rect({
-        x: dragRect.x,
-        y: dragRect.y,
-        width: 10,
-        height: 10,
-        fill: "blue",
-        draggable: true,
-        dragBoundFunc: (pos) => {
-          const newX = Math.max(pos.x, offsetX + 200);
-          const newY = Math.max(pos.y, offsetY + 300);
-          return { x: newX, y: newY };
-        },
-      });
-      dragHandle.on("dragmove", (e) => {
-        const newCols = Math.ceil((e.target.x() - offsetX) / gridWidth);
-        const newRows = Math.ceil((e.target.y() - offsetY) / gridHeight);
-        setColumns(newCols);
-        setRows(newRows);
-        setDragRect({ x: e.target.x(), y: e.target.y() });
-      });
-      layer.add(dragHandle);
+  
       const transformer = new Konva.Transformer();
       layer.add(transformer);
       transformerRef.current = transformer;
+  
       layer.draw();
     };
   }, [view, columns, rows]);
+  
   const addText = () => {    
-    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;      
-    
+    if (!layerRef.current || !transformerRef.current || !stageRef.current) return;       
     const text = new Konva.Text({
       x: 150,
       y: 200,
-      text: "Click to edit",
+      text: "some text",
       fontSize: 20,
       draggable: true,
       fill: "black",
     });
     text.on('transform', function () {
-      // reset scale, so only with is changing by transformer
       text.setAttrs({
         width: text.width() * text.scaleX(),
         scaleX: 1,
       });
-    });
-
- 
+    }); 
     const layer = layerRef.current;
     const stage = layer?.getStage();
     // T-shirt image boundaries (assuming fixed dimensions)
@@ -117,7 +102,6 @@ const [imageElements, setImageElements] = useState<
     const tshirtY = (500 - 300) / 2;  // Y position of T-shirt image
     const tshirtWidth = 204;          // Width of T-shirt image
     const tshirtHeight = 255;         // Height of T-shirt image
-
     // Create X and Y axis guide lines (full canvas span)
     const xAxis = new Konva.Line({
       points: [0, text.y() + text.height() / 2, 500, text.y() + text.height() / 2], 
@@ -127,7 +111,6 @@ const [imageElements, setImageElements] = useState<
       listening: false,
       visible: false,
     });
-
     const yAxis = new Konva.Line({
       points: [text.x() + text.width() / 2, 0, text.x() + text.width() / 2, 500], 
       stroke: "blue",
@@ -136,7 +119,6 @@ const [imageElements, setImageElements] = useState<
       listening: false,
       visible: false,
     });
-
     layer.add(xAxis, yAxis);
     text.on("click", () => {
       xAxis.visible(true);
@@ -148,11 +130,9 @@ const [imageElements, setImageElements] = useState<
     text.on("mouseover", () => {
       document.body.style.cursor = "move";
     });
-
     text.on("mouseout", () => {
       document.body.style.cursor = "default";
     });
-
     // Select text when clicked
     text.on("click", (e) => {
       e.cancelBubble = true;
@@ -165,61 +145,55 @@ const [imageElements, setImageElements] = useState<
           scaleX: 1,
       });
   });
+     
   const editText = () => {
-      const textPosition = text.getAbsolutePosition();
-      const stageBox = stage.container().getBoundingClientRect();
-
-      const textarea = document.createElement("textarea");
-      document.body.appendChild(textarea);
-
-      textarea.value = text.text();
-      textarea.style.position = "absolute";
-      textarea.style.top = `${textPosition.y + stageBox.top}px`;
-      textarea.style.left = `${textPosition.x + stageBox.left}px`;
-      textarea.style.width = `${text.width()}px`;
-      textarea.style.height = `${text.height()}px`;
-      textarea.style.fontSize = `${text.fontSize()}px`;
-      textarea.style.border = "none";
-      textarea.style.padding = "5px";
-      textarea.style.margin = "0";
-      textarea.style.outline = "none";
-      textarea.style.resize = "none";
-      textarea.style.background = "transparent";
-      textarea.style.overflow = "hidden";
-      textarea.style.fontFamily = text.fontFamily();
-
-      textarea.focus();
-
-      textarea.addEventListener("blur", () => {
-          text.text(textarea.value);
-          document.body.removeChild(textarea);
-          layer.batchDraw();
-      });
-
-      textarea.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") {
-              event.preventDefault();
-              text.text(textarea.value);
-              document.body.removeChild(textarea);
-              layer.batchDraw();
-          }
-      });
-  };
-
-  text.on("dblclick", editText);
-
-
+    const textPosition = text.getAbsolutePosition();
+    const stageBox = stage.container().getBoundingClientRect();
+    
+    const textarea = document.createElement("textarea");
+    document.body.appendChild(textarea);
+    
+    textarea.value = text.text();
+    textarea.style.position = "absolute";
+    textarea.style.top = `${textPosition.y + stageBox.top}px`;
+    textarea.style.left = `${textPosition.x + stageBox.left}px`;
+    textarea.style.width = `${text.width()}px`;
+    textarea.style.height = `${text.height()}px`;
+    textarea.style.fontSize = `${text.fontSize()}px`;
+    textarea.style.border = "none";
+    textarea.style.padding = "5px";
+    textarea.style.margin = "0";
+    textarea.style.outline = "none";
+    textarea.style.resize = "none";
+    textarea.style.background = "transparent";
+    textarea.style.overflow = "hidden";
+    textarea.style.fontFamily = text.fontFamily();
+    textarea.focus();
+    
+    textarea.addEventListener("blur", () => {
+        text.text(textarea.value);
+        document.body.removeChild(textarea);
+        layer.batchDraw();
+    });
+    
+    textarea.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            text.text(textarea.value);
+            document.body.removeChild(textarea);
+            layer.batchDraw();
+        }
+    });
+};
+text.on("dblclick", editText);
     // Restrict text drag within the T-shirt image
     text.on("dragmove", () => {
       const newX = Math.max(tshirtX, Math.min(text.x(), tshirtX + tshirtWidth - text.width()));
       const newY = Math.max(tshirtY, Math.min(text.y(), tshirtY + tshirtHeight - text.height()));
-
       text.position({ x: newX, y: newY });
-
       // Update guide lines based on text center
       xAxis.points([0, newY + text.height() / 2, 500, newY + text.height() / 2]);
       yAxis.points([newX + text.width() / 2, 0, newX + text.width() / 2, 500]);
-
       layer.batchDraw();
     });
     stage?.on("click", (e) => {
@@ -230,19 +204,15 @@ const [imageElements, setImageElements] = useState<
         layer?.batchDraw();
       }
     });
-
     layer.add(text);
-    setTextElements((prev) => [...prev, { id: uuidv4(), node: text }]);
+    addTextElement({ id: uuidv4(), node: text });
     transformerRef.current.nodes([...transformerRef.current.nodes(), text]);
     layer.draw();
 };
-
 const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
   if (!event.target.files || !layerRef.current || !transformerRef.current) return;
-
   const file = event.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = () => {
     if (typeof reader.result === "string") {
@@ -254,16 +224,13 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
           height: 200,
           draggable: true,
         });
-
         const layer = layerRef.current;
         const stage = layer?.getStage();
-
         // T-shirt image boundaries
         const tshirtX = (500 - 200) / 2;
         const tshirtY = (500 - 300) / 2;
         const tshirtWidth = 204;
         const tshirtHeight = 255;
-
         // Create X and Y axis guide lines
         const xAxis = new Konva.Line({
           points: [0, img.y() + img.height() / 2, 500, img.y() + img.height() / 2],
@@ -274,7 +241,6 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
           name: "axis",
           visible: false, // Initially hidden
         });
-
         const yAxis = new Konva.Line({
           points: [img.x() + img.width() / 2, 0, img.x() + img.width() / 2, 500],
           stroke: "blue",
@@ -284,36 +250,26 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
           name: "axis",
           visible: false, // Initially hidden
         });
-
         layer?.add(xAxis, yAxis);
-
         function updateAxes() {
           const centerX = img.x() + img.width() / 2;
           const centerY = img.y() + img.height() / 2;
-
           xAxis.points([0, centerY, 500, centerY]);
           yAxis.points([centerX, 0, centerX, 500]);
-
           layer?.batchDraw();
         }
-
         img.on("dragmove", () => {
           const newX = Math.max(tshirtX, Math.min(img.x(), tshirtX + tshirtWidth - img.width()));
           const newY = Math.max(tshirtY, Math.min(img.y(), tshirtY + tshirtHeight - img.height()));
-
           img.position({ x: newX, y: newY });
-
           updateAxes();
           layer?.batchDraw();
         });
-
         img.on("transform", () => {
           const newWidth = img.width() * img.scaleX();
           const newHeight = img.height() * img.scaleY();
-
           const newX = Math.max(tshirtX, Math.min(img.x(), tshirtX + tshirtWidth - newWidth));
           const newY = Math.max(tshirtY, Math.min(img.y(), tshirtY + tshirtHeight - newHeight));
-
           img.setAttrs({
             width: newWidth,
             height: newHeight,
@@ -322,11 +278,9 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
             x: newX,
             y: newY,
           });
-
           updateAxes();
           layer?.batchDraw();
         });
-
         // Show axes when image is clicked
         img.on("click", () => {
           xAxis.visible(true);
@@ -334,7 +288,6 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
           transformerRef.current?.nodes([img]);
           layer?.batchDraw();
         });
-
         // Hide axes when clicking outside the image
         stage?.on("click", (e) => {
           if (e.target !== img) {
@@ -344,14 +297,11 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
             layer?.batchDraw();
           }
         });
-
         img.on("mouseover", () => (document.body.style.cursor = "move"));
         img.on("mouseout", () => (document.body.style.cursor = "default"));
-
         layer?.add(img);
-        setImageElements((prev) => [...prev, { id: uuidv4(), node: img }]);
+        addImageElement({ id: uuidv4(), node: img });
         layer?.draw();
-
         if (transformerRef.current) {
           transformerRef.current.nodes([img]);
         }
@@ -360,7 +310,6 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
   };
   reader.readAsDataURL(file);
 };
-
   const exportDesign = () => {
     if (!layerRef.current) return;
     const dataURL = layerRef.current.getStage().toDataURL();

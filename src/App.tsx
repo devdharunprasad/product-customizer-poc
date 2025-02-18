@@ -1,11 +1,13 @@
 
 import './App.css'
-import TShirtEditor from './canvascomponent/CanvasComponent'
+// import TShirtEditor from './canvascomponent/CanvasComponent'
+import FabricTextComponent from './canvascomponent/fabricComponent'
 function App() {
   return (
     <>
     <div>
-      < TShirtEditor/>
+     {/* <TShirtEditor/> */}
+      < FabricTextComponent/>
     </div>
       
     </>
