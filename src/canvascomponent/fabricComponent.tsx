@@ -121,75 +121,57 @@ const FabricTextComponent = () => {
     interface CustomFabricObject extends fabric.Object {
       customId?: string;
   }
-  interface CustomFabricObject extends fabric.Object {
-    customId?: string;
-}
-
-const handleTextMove = (textObj: fabric.IText, canvas: fabric.Canvas) => {
-    const bounds = canvas.gridBounds as { left: number; right: number; top: number; bottom: number };
-
-    // Ensure the text stays completely inside the grid boundaries
-    const minX = bounds.left;
-    const minY = bounds.top;
-    const maxX = bounds.right - textObj.width!;
-    const maxY = bounds.bottom - textObj.height!;
-
-    // Clamp the position within the allowed area
-    const newLeft = Math.max(minX, Math.min(maxX, textObj.left || 0));
-    const newTop = Math.max(minY, Math.min(maxY, textObj.top || 0));
-
-    // Apply new position
-    textObj.set({ left: newLeft, top: newTop });
-
-    // Remove previous guide lines if they exist
-    removeGuidelinesforText(canvas);
-
-    // Create vertical (Y-axis) guide line
-    const yGuide = new fabric.Line([newLeft, 0, newLeft, canvas.getHeight()], {
-        stroke: 'red',
-        strokeDashArray: [5, 5],
-        selectable: false,
-        evented: false
-    }) as CustomFabricObject;
-
-    // Create horizontal (X-axis) guide line
-    const xGuide = new fabric.Line([0, newTop, canvas.getWidth(), newTop], {
-        stroke: 'red',
-        strokeDashArray: [5, 5],
-        selectable: false,
-        evented: false
-    }) as CustomFabricObject;
-
-    // Assign a custom property to identify the guide lines
-    yGuide.customId = 'y-guide';
-    xGuide.customId = 'x-guide';
-
-    // Add guide lines to canvas
-    canvas.add(yGuide, xGuide);
-
-    canvas.renderAll();
-
-    // Add event listener to remove guidelines when clicking outside the text
-    canvas.on('mouse:down', (event) => {
+  
+  const handleTextMove = (textObj: fabric.IText, canvas: fabric.Canvas) => {
+      const bounds = canvas.gridBounds as { left: number; right: number; top: number; bottom: number };
+  
+      // Ensure the object stays within the grid boundaries
+      const newLeft = Math.max(bounds.left, Math.min(bounds.right, textObj.left || 0));
+      const newTop = Math.max(bounds.top, Math.min(bounds.bottom, textObj.top || 0));
+  
+      // Apply new position
+      textObj.set({ left: newLeft, top: newTop });
+  
+      // Remove previous guide lines if they exist
+      canvas.getObjects().forEach(obj => {
+          const fabricObj = obj as CustomFabricObject;
+          if (fabricObj.customId === 'x-guide' || fabricObj.customId === 'y-guide') {
+              canvas.remove(fabricObj);
+          }
+      });
+      removeGuidelines(canvas);
+      // Create vertical (Y-axis) guide line
+      const yGuide = new fabric.Line([newLeft, 0, newLeft, canvas.getHeight()], {
+          stroke: 'red',
+          strokeDashArray: [5, 5],
+          selectable: false,
+          evented: false
+      }) as CustomFabricObject;
+  
+      // Create horizontal (X-axis) guide line
+      const xGuide = new fabric.Line([0, newTop, canvas.getWidth(), newTop], {
+          stroke: 'red',
+          strokeDashArray: [5, 5],
+          selectable: false,
+          evented: false
+      }) as CustomFabricObject;
+  
+      // Assign a custom property to identify the guide lines
+      yGuide.customId = 'y-guide';
+      xGuide.customId = 'x-guide';
+  
+      // Add guide lines to canvas
+      canvas.add(yGuide, xGuide);
+  
+      canvas.renderAll();
+      canvas.on('mouse:down', (event) => {
         if (!event.target || event.target !== textObj) {
             removeGuidelines(canvas);
         }
     });
-};
-
-// Function to Remove Guidelines
-const removeGuidelinesforText = (canvas: fabric.Canvas) => {
-    canvas.getObjects().forEach((obj) => {
-        const fabricObj = obj as CustomFabricObject;
-        if (fabricObj.customId === 'x-guide' || fabricObj.customId === 'y-guide') {
-            canvas.remove(fabricObj);
-        }
-    });
-    canvas.renderAll();
-};
-
+  };
   
-    // Function to check if text is outside the grid and hide it
+     // Function to check if text is outside the grid and hide it
     const monitorTextMovement = () => {
         if (canvasRef.current) {
             const canvas = canvasRef.current;
