@@ -26,10 +26,10 @@ const TShirtEditor: React.FC = () => {
   const gridScale: { [key: string]: number } = {
     S: 1.2,
     M: 1,
-    L: 0.8,
-    XL: 0.5,
-    "2XL": 0.2,
-    "3XL": 0.1,
+    L: 0.9,
+    XL: 0.8,
+    "2XL": 0.7,
+    "3XL": 0.6,
   };
   useEffect(() => {
     if (!stageRef.current) return;  
