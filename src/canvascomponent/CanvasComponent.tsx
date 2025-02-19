@@ -1,4 +1,4 @@
-import React, { useEffect, useRef} from "react";
+import React, { useEffect, useRef, useState} from "react";
 import { BoxSelect, Database, Image, Link, Tag, Type } from "lucide-react";
 import Konva from "konva";
 import "./tshirt.css";
@@ -6,8 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 import useTShirtStore from "../store/useTShirtStore";
 const TShirtEditor: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
-  
+  const [activeSize, setActiveSize] = useState(null);
+  console.log({activeSize});
   const layerRef = useRef<Konva.Layer | null>(null);
+  const [size, setSize] = useState("M");
+  console.log({size})
   const {
     color,
     view,
@@ -16,29 +19,33 @@ const TShirtEditor: React.FC = () => {
     addTextElement,
     addImageElement,
   } = useTShirtStore();
-
   const rows:number= 20
   const columns:number =16
   const transformerRef = useRef<Konva.Transformer | null>(null);
+  const sizes: string[] = ["S", "M", "L", "XL", "2XL", "3XL"];
+  const gridScale: { [key: string]: number } = {
+    S: 1.2,
+    M: 1,
+    L: 0.8,
+    XL: 0.5,
+    "2XL": 0.2,
+    "3XL": 0.1,
+  };
   useEffect(() => {
-    if (!stageRef.current) return;
-  
+    if (!stageRef.current) return;  
     const stage = new Konva.Stage({
       container: stageRef.current,
       width: 500,
       height: 500,
-    });
-  
+    });  
     const layer = new Konva.Layer();
     stage.add(layer);
-    layerRef.current = layer;
-  
+    layerRef.current = layer;  
     const imageObj = new window.Image();
     imageObj.src =
       view === "Front side"
         ? "/src/assets/Group 1000002904.png"
-        : "path_to_back_tshirt_image.png";
-  
+        : "/src/assets/Group 1000002984 (1).svg";  
     imageObj.onload = () => {
       const tshirtImage = new Konva.Image({
         image: imageObj,
@@ -46,16 +53,15 @@ const TShirtEditor: React.FC = () => {
         y: 0,
         width: 500,
         height: 500,
-      });
-  
-      layer.add(tshirtImage);
-  
-      // Grid Calculation
-      const gridWidth = 204 / columns;
-      const gridHeight = 255 / rows;
-      const offsetX = (500 - 200) / 2;
-      const offsetY = (500 - 300) / 2;
-  
+      });  
+      layer.add(tshirtImage); 
+       // Grid Calculation
+       const scale = gridScale[size];
+       console.log({scale});
+       const gridWidth = (204 / columns) * scale;
+       const gridHeight = (255 / rows) * scale;
+       const offsetX = (500 - gridWidth * columns) / 2;
+       const offsetY = (500 - gridHeight * rows) / 2;  
       // Draw the grid (fixed, not draggable)
       for (let i = 0; i < columns; i++) {
         for (let j = 0; j < rows; j++) {
@@ -70,15 +76,12 @@ const TShirtEditor: React.FC = () => {
           layer.add(rect);
         }
       }
-  
       const transformer = new Konva.Transformer();
       layer.add(transformer);
-      transformerRef.current = transformer;
-  
+      transformerRef.current = transformer;  
       layer.draw();
     };
-  }, [view, columns, rows]);
-  
+  }, [view, columns, rows,size]);  
   const addText = () => {    
     if (!layerRef.current || !transformerRef.current || !stageRef.current) return;       
     const text = new Konva.Text({
@@ -144,15 +147,12 @@ const TShirtEditor: React.FC = () => {
           width: text.width() * text.scaleX(),
           scaleX: 1,
       });
-  });
-     
+  });     
   const editText = () => {
     const textPosition = text.getAbsolutePosition();
-    const stageBox = stage.container().getBoundingClientRect();
-    
+    const stageBox = stage.container().getBoundingClientRect();    
     const textarea = document.createElement("textarea");
-    document.body.appendChild(textarea);
-    
+    document.body.appendChild(textarea);    
     textarea.value = text.text();
     textarea.style.position = "absolute";
     textarea.style.top = `${textPosition.y + stageBox.top}px`;
@@ -317,7 +317,12 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     link.href = dataURL;
     link.download = "tshirt-design.png";
     link.click();
-  };
+  };     
+  
+    const handleSizeClick = (size:string) => {
+      setActiveSize(size);
+      setSize(size);
+    };
   return (
     <>
       <div className=" min-h-screen flex flex-col items-center pb-6">
@@ -399,6 +404,17 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
             </div>
           </div>
           <button onClick={exportDesign}>Download Design</button>
+          <div className="flex space-x-2">
+      {sizes.map((size) => (
+        <button
+          key={size}
+          onClick={() => handleSizeClick(size)}
+          className={`border-2 px-4 py-2 rounded ${activeSize === size ? 'border-blue-500 text-white bg-blue-500' : 'border-gray-300 text-gray-500'}`}
+        >
+          {size}
+        </button>
+      ))}
+    </div>
           <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md p-4 flex items-center justify-between">
             <div className="flex items-center space-x-4 p-4">
               <img

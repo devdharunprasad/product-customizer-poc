@@ -12,43 +12,25 @@ const FabricTextComponent = () => {
     const canvasRef = useRef<fabric.Canvas | null>(null);
     const [side, setSide] = useState<'front' | 'back'>('front');
     const {view,setView}=useTShirtStore();
-
     useEffect(() => {
-        if (!canvasRef.current) {
-            canvasRef.current = new fabric.Canvas('canvas');
-            drawGrid();
-        }
-        // loadBackgroundImage();
-        if (!canvasRef.current) {
-          canvasRef.current = new fabric.Canvas('tshirtCanvas');
-        }
-    
-        const canvas = canvasRef.current;
-        const imagePath = view === "Front side"
-        ? "/src/assets/Group 1000002904.png"
-        : "path_to_back_tshirt_image.png";
-      
-        fabric.FabricImage.fromURL(
-          imagePath,
-          (img: fabric.Image) => {
-            img.set({
-              left: 0,
-              top: 0,
-              scaleX: 500 / img.width!,
-              scaleY: 500 / img.height!,
-            });
-        
-            canvas.add(img);
-          },
-          {} // Pass an empty object for LoadImageOptions
-        );
-        return () => {
-            if (canvasRef.current) {
-                canvasRef.current.dispose();
-                canvasRef.current = null;
-            }
-        };
-    }, [side]);
+      if (!canvasRef.current) {
+          canvasRef.current = new fabric.Canvas('canvas');
+          drawGrid(); // Assuming drawGrid() is defined elsewhere in your code
+      }
+      const canvas = canvasRef.current;
+      const imagePath = view === "Front side"
+          ? "/src/assets/Group 1000002904.png"
+          : "path_to_back_tshirt_image.png";      
+      fabric.FabricImage.fromURL(imagePath, (img) => {
+          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+      });
+      return () => {
+          if (canvasRef.current) {
+              canvasRef.current.dispose();
+              canvasRef.current = null;
+          }
+      };
+  }, [view]);
     const drawGrid = () => {
         if (canvasRef.current) {
             const canvas = canvasRef.current;
@@ -90,12 +72,10 @@ const FabricTextComponent = () => {
                     evented: false
                 });
                 canvas.add(line);
-            }
-    
+            }    
             canvas.renderAll();
         }
-    };
-    
+    };    
     const addText = () => { 
         if (canvasRef.current) {
             const canvas = canvasRef.current;
@@ -158,11 +138,9 @@ const FabricTextComponent = () => {
   
       // Assign a custom property to identify the guide lines
       yGuide.customId = 'y-guide';
-      xGuide.customId = 'x-guide';
-  
+      xGuide.customId = 'x-guide';  
       // Add guide lines to canvas
-      canvas.add(yGuide, xGuide);
-  
+      canvas.add(yGuide, xGuide);  
       canvas.renderAll();
       canvas.on('mouse:down', (event) => {
         if (!event.target || event.target !== textObj) {
