@@ -14,70 +14,77 @@ const FabricTextComponent = () => {
   useEffect(() => {
     if (!canvasRef.current) {
       canvasRef.current = new fabric.Canvas("canvas");
-      drawGrid();
     }
+  
     const canvas = canvasRef.current;
-    const imagePath =
-      view === "Front side"
-        ? "/src/assets/Group 1000002904.png"
-        : "path_to_back_tshirt_image.png";
-    fabric.FabricImage.fromURL(imagePath, (img) => {
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-    });
-    return () => {
+    const ctx = canvas?.getContext("2d");
+  
+    const backgroundImage = new Image();
+    backgroundImage.src = "/src/assets/Group 1000002904.png"; // Replace with your image path
+  
+    backgroundImage.onload = () => {
+      ctx?.drawImage(backgroundImage, 0, 0, canvas?.width, canvas?.height);
+      drawGrid(); // Draw grid after the background image loads
+    };
+  
+    const drawGrid = () => {
       if (canvasRef.current) {
-        canvasRef.current.dispose();
-        canvasRef.current = null;
+        const canvas = canvasRef.current;
+        const inchToPixel = 12.75;
+        const cellSize = inchToPixel / 10;
+        const gridSizeX = 16;
+        const gridSizeY = 20;
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+        const offsetX = (canvasWidth - gridSizeX * cellSize * 10) / 2;
+        const offsetY = (canvasHeight - gridSizeY * cellSize * 10) / 2;
+  
+        // Remove existing grid lines
+        canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
+  
+        // Define grid bounds
+        canvas.gridBounds = {
+          left: offsetX,
+          right: offsetX + gridSizeX * cellSize * 10,
+          top: offsetY,
+          bottom: offsetY + gridSizeY * cellSize * 10,
+        };
+  
+        // Draw vertical lines
+        for (let i = 0; i <= gridSizeX; i++) {
+          const x = offsetX + i * cellSize * 10;
+          const line = new fabric.Line(
+            [x, offsetY, x, offsetY + gridSizeY * cellSize * 10],
+            {
+              stroke: "red",
+              strokeWidth: 0.3,
+              selectable: false,
+              evented: false,
+            }
+          );
+          canvas.add(line);
+        }
+  
+        // Draw horizontal lines
+        for (let j = 0; j <= gridSizeY; j++) {
+          const y = offsetY + j * cellSize * 10;
+          const line = new fabric.Line(
+            [offsetX, y, offsetX + gridSizeX * cellSize * 10, y],
+            {
+              stroke: "red",
+              strokeWidth: 0.3,
+              selectable: false,
+              evented: false,
+            }
+          );
+          canvas.add(line);
+        }
+  
+        canvas.renderAll(); // Render everything
       }
     };
-  }, [view]);
-  const drawGrid = () => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      const inchToPixel = 12.75;
-      const cellSize = inchToPixel / 10;
-      const gridSizeX = 16;
-      const gridSizeY = 20;
-      const canvasWidth = canvas.getWidth();
-      const canvasHeight = canvas.getHeight();
-      const offsetX = (canvasWidth - gridSizeX * cellSize * 10) / 2;
-      const offsetY = (canvasHeight - gridSizeY * cellSize * 10) / 2;
-      canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
-      canvas.gridBounds = {
-        left: offsetX,
-        right: offsetX + gridSizeX * cellSize * 10,
-        top: offsetY,
-        bottom: offsetY + gridSizeY * cellSize * 10,
-      };
-      for (let i = 0; i <= gridSizeX; i++) {
-        const x = offsetX + i * cellSize * 10;
-        const line = new fabric.Line(
-          [x, offsetY, x, offsetY + gridSizeY * cellSize * 10],
-          {
-            stroke: "red",
-            strokeWidth: 0.3,
-            selectable: false,
-            evented: false,
-          }
-        );
-        canvas.add(line);
-      }
-      for (let j = 0; j <= gridSizeY; j++) {
-        const y = offsetY + j * cellSize * 10;
-        const line = new fabric.Line(
-          [offsetX, y, offsetX + gridSizeX * cellSize * 10, y],
-          {
-            stroke: "red",
-            strokeWidth: 0.3,
-            selectable: false,
-            evented: false,
-          }
-        );
-        canvas.add(line);
-      }
-      canvas.renderAll();
-    }
-  };
+  }, []);
+  
   const addText = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -337,6 +344,18 @@ const FabricTextComponent = () => {
     });
     canvas.renderAll();
   };
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas?.getContext("2d");
+
+  //   const backgroundImage = new Image();
+  //   backgroundImage.src = "/src/assets/Group 1000002904.png"; // Replace with your image path
+
+  //   backgroundImage.onload = () => {
+  //     ctx?.drawImage(backgroundImage, 0, 0, canvas?.width, canvas?.height);
+  //   };
+  // }, []);
+
   const toggleSide = () => {
     setSide((prevSide) => (prevSide === "front" ? "back" : "front"));
   };
