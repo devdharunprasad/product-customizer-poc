@@ -222,7 +222,7 @@ const FabricTextComponent = () => {
               let scaleFactor =
                 maxDisplaySize / Math.max(imgObj.width, imgObj.height);
               scaleFactor = Math.min(scaleFactor, 1);
-              const fabricImg = new fabric.Image(imgObj, {
+              const fabricImg = new fabric.FabricImage(imgObj, {
                 scaleX: scaleFactor,
                 scaleY: scaleFactor,
                 originX: "center",
