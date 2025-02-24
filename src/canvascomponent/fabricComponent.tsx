@@ -23,12 +23,12 @@ const FabricTextComponent = () => {
         const canvas = canvasRef.current;
         // Original Length and Breadth (Replace with actual values if needed)
         const originalDimensions = {
-            "S": 12.75, 
-            "M": 12.25, 
-            "L": 11.75, 
-            "XL": 11.25,
-            "2XL": 10.75, 
-            "3XL": 10.25, 
+            "S": 12.75, // Base size for 'S'
+            "M": 11.75, // 12.75 - 2
+            "L": 10.75,  // 12.75 - 4
+            "XL": 9.75, // 12.75 - 6
+            "2XL": 8.75, // 12.75 - 8
+            "3XL": 7.75, // 12.75 - 10
         };
         // Get the size value or fall back to the default 'S' size
         const baseCellSize = originalDimensions[size] || 12.75;
