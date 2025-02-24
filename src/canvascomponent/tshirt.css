@@ -8,6 +8,11 @@
   background-size: cover;
   -webkit-background-size: cover;
 }
+/* Add this CSS to your styles */
+button:focus {
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 0 1px blue; /* Blue border around the button */
+}
 
 
 .container {

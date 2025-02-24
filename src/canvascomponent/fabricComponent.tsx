@@ -488,20 +488,68 @@ const FabricTextComponent = () => {
       >
         Toggle Side
       </button>
+      <div className="flex flex-row justify-between gap-4 pr-8">
       <div className="bg-white px-40 py-8 rounded-xl border ">
-      <div className="tshirt">
-        <canvas id="canvas" width="600" height="500"></canvas>
+        <div className="tshirt">
+          <canvas id="canvas" width="600" height="500"></canvas>
         </div>
       </div>
-      <div className="flex flex-row items-center space-y-2">
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('S')}>S</button>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('M')}>M</button>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('L')}>L</button>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('XL')}>XL</button>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('2XL')}>2XL</button>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded" onClick={() => drawGrid('3XL')}>3XL</button>
-        </div>
-      <div className="flex justify-center pt-16">
+      <div className="relative w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">
+            <p className="text-lg font-semibold transform -rotate-90">
+          Big Heart
+            </p>
+            <button className="absolute top-2 right-2 bg-white p-2 rounded shadow">
+          &#x2197;
+            </button>
+            <div className="absolute bottom-2 flex space-x-2">
+          <button className="bg-white p-2 rounded shadow">
+            &#x2039;
+          </button>
+          <button className="bg-white p-2 rounded shadow">
+            &#x203A;
+          </button>
+            </div>
+      </div>
+      </div>
+      <div className="flex flex-row items-center pt-4  space-x-2">
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("S")}
+        >
+          S
+        </button>
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("M")}
+        >
+          M
+        </button>
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("L")}
+        >
+          L
+        </button>
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("XL")}
+        >
+          XL
+        </button>
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("2XL")}
+        >
+          2XL
+        </button>
+        <button
+          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+          onClick={() => drawGrid("3XL")}
+        >
+          3XL
+        </button>
+      </div>
+      <div className="flex justify-center pt-8">
         <div className="flex justify-center space-x-4 bg-white rounded-lg border px-10 py-2 w-fit">
           {[
             "Front side",
