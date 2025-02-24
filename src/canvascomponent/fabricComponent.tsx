@@ -10,7 +10,7 @@ declare module "fabric" {
 }
 const FabricTextComponent = () => {
   const canvasRef = useRef<fabric.Canvas | null>(null);
-  const { view, setView } = useTShirtStore();  
+  const { view,setView } = useTShirtStore();  
   useEffect(() => {
     if (!canvasRef.current) {
       // Initialize Fabric.js canvas
@@ -24,10 +24,10 @@ const FabricTextComponent = () => {
         const canvas = canvasRef.current;
         // Original Length and Breadth (Replace with actual values if needed)
         const originalDimensions = {
-            S: 12.75, // Base size for 'S'
-            M: 11.75, // 12.75 - 2
-            L: 10.75,  // 12.75 - 4
-            XL: 9.75, // 12.75 - 6
+            "S": 12.75, // Base size for 'S'
+            "M": 11.75, // 12.75 - 2
+            "L": 10.75,  // 12.75 - 4
+            "XL": 9.75, // 12.75 - 6
             "2XL": 8.75, // 12.75 - 8
             "3XL": 7.75, // 12.75 - 10
         };
@@ -406,7 +406,7 @@ const FabricTextComponent = () => {
       {/* <button onClick={addText} style={{ marginBottom: '10px', marginRight: '10px' }}>Add Text</button>
             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ marginBottom: '10px' }} /> */}
 
-      <div className="flex flex-row justify-between gap-4 pr-8">
+      <div className="flex flex-row  gap-4 pt-8 pr-8">
       <div className="bg-white px-40 py-8 rounded-xl border ">
         <div className="tshirt">
           <canvas id="canvas" width="600" height="500"></canvas>
@@ -429,67 +429,70 @@ const FabricTextComponent = () => {
             </div>
       </div>
       </div>
-      <div className="flex flex-row items-center pt-4  space-x-2">
+      <div className="flex  flex-col justify-center w-full">
+  <div className="flex flex-row justify-center pt-4 space-x-2">
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("S")}
+    >
+      S
+    </button>
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("M")}
+    >
+      M
+    </button>
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("L")}
+    >
+      L
+    </button>
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("XL")}
+    >
+      XL
+    </button>
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("2XL")}
+    >
+      2XL
+    </button>
+    <button
+      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+      onClick={() => drawGrid("3XL")}
+    >
+      3XL
+    </button>
+  </div>
+  <div className="flex justify-center pt-8">
+    <div className="flex justify-center space-x-4 bg-white rounded-lg border px-10 py-2 w-fit">
+      {[
+        "Front side",
+        "Back side",
+        "Left sleeve",
+        "Right Sleeve",
+        "Pocket",
+      ].map((v: string) => (
         <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("S")}
+          key={v}
+          onClick={() => setView(v)}
+          className={`px-4 py-2 rounded-md ${
+            view === v
+              ? "bg-gray-200 font-bold text-black"
+              : "text-gray-700 hover:text-black"
+          }`}
         >
-          S
+          {v} Side
         </button>
-        <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("M")}
-        >
-          M
-        </button>
-        <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("L")}
-        >
-          L
-        </button>
-        <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("XL")}
-        >
-          XL
-        </button>
-        <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("2XL")}
-        >
-          2XL
-        </button>
-        <button
-          className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-          onClick={() => drawGrid("3XL")}
-        >
-          3XL
-        </button>
-      </div>
-      <div className="flex justify-center pt-8">
-        <div className="flex justify-center space-x-4 bg-white rounded-lg border px-10 py-2 w-fit">
-          {[
-            "Front side",
-            "Back side",
-            "Left sleeve",
-            "Right Sleeve",
-            "Pocket",
-          ].map((v:string) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-4 py-2 rounded-md ${
-                view === v
-                  ? "bg-gray-200 font-bold text-black"
-                  : "text-gray-700 hover:text-black"
-              }`}
-            >
-              {v} Side
-            </button>
-          ))}
-        </div>
-      </div>
+      ))}
+    </div>
+  </div>
+</div>
+
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-4 p-4">
           <img
