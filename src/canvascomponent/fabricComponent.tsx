@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as fabric from "fabric";
 import { BoxSelect, Database, Link, Tag, Type } from "lucide-react";
 import useTShirtStore from "../store/useTShirtStore";
