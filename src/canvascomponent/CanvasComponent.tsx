@@ -53,8 +53,8 @@ const TShirtEditor: React.FC = () => {
       });
       layer.add(tshirtImage);
       // Grid Calculation
-      const gridWidth = convertToInches(204 / columns, size);
-      const gridHeight = convertToInches(255 / rows, size);
+      const gridWidth = convertToInches(204/columns, size); 
+      const gridHeight =convertToInches(255/rows, size);
       const offsetX = (500 - gridWidth * columns * 12.75) / 2;
       const offsetY = (500 - gridHeight * rows * 12.75) / 2;
       // Draw the grid (draggable)
@@ -69,7 +69,6 @@ const TShirtEditor: React.FC = () => {
             strokeWidth: 0.1,
             draggable: true,
           });
-
           rect.on("transform", () => {
             const scaleX = rect.scaleX();
             const scaleY = rect.scaleY();
@@ -614,6 +613,22 @@ const TShirtEditor: React.FC = () => {
             ))}
           </div>
         </div>
+        <div className="flex space-x-2">
+            {sizes.map((size) => (
+              <button
+            key={size}
+            onClick={() => handleSizeClick(size)}
+            className={`px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10 ${
+              activeSize === size
+                ? "border-blue-500 text-blue-500"
+                : "border-gray-300"
+            }`}
+              >
+            {size}
+              </button>
+            ))}
+          </div>
+            
         <button onClick={exportDesign}>Download Design</button>
           </div>
           <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md p-4 flex items-center justify-between">

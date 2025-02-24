@@ -1,14 +1,17 @@
 
 import './App.css'
+//import BasicCanvas from './canvascomponent/demo'
 //import Navbar from './canvascomponent/navbar'
-//import TShirtEditor from './canvascomponent/CanvasComponent'
+// import TShirtEditor from './canvascomponent/CanvasComponent'
 //import Dashboard from './canvascomponent/navbar'
 import FabricTextComponent from './canvascomponent/fabricComponent'
 function App() {
   return (
     <>
     <div>
-    {/* // <TShirtEditor/> */}
+    {/* <TShirtDesigner/> */}
+    {/* <TShirtEditor/> */}
+    {/* <BasicCanvas/> */}
       < FabricTextComponent/>
       {/* <Navbar/> */}
       {/* <Dashboard/> */}
