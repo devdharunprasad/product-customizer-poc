@@ -53,34 +53,22 @@ const FabricTextComponent = () => {
   //     }
   //   );
   // };
-  const inchesToPixels = (inches: number): number => {
-    const inchToPixel = 12.75;
-    return inches * inchToPixel;
-  };
   const drawGrid = (size: string) => {
     if (canvasRef.current) {
         const canvas = canvasRef.current;
 
         // Original Length and Breadth (Replace with actual values if needed)
         const originalDimensions = {
-            S: { L: 0.7, B: 0.7 },
-            M: { L: 0.8, B: 0.8 },
-            L: { L: 1, B: 1 },
-            XL: { L:1.1, B:1.1 },
-            "2XL": { L: 1.2, B: 1.2},
-            "3XL": { L: 1.3, B: 1.3},
+            S: 12.75, // Base size for 'S'
+            M: 11.75, // 12.75 - 2
+            L: 10.75,  // 12.75 - 4
+            XL: 9.75, // 12.75 - 6
+            "2XL": 8.75, // 12.75 - 8
+            "3XL": 7.75, // 12.75 - 10
         };
 
-        // Scaling Factor Calculation
-        const scaleFactors = {
-            L: originalDimensions["S"].L / (originalDimensions[size]?.L || 1),
-            B: originalDimensions["S"].B / (originalDimensions[size]?.B || 1),
-        };
-
-        // Dynamic scaling for cell size based on dimensions
-        const baseCellSize = inchesToPixels(1) / 10;
-        const cellSizeX = baseCellSize * scaleFactors.L;
-        const cellSizeY = baseCellSize * scaleFactors.B;
+        // Get the size value or fall back to the default 'S' size
+        const baseCellSize = originalDimensions[size] || 12.75;
 
         // Define grid size
         const gridSizeX = 16;
@@ -89,8 +77,8 @@ const FabricTextComponent = () => {
         const canvasHeight = canvas.getHeight();
 
         // Offsets for centering the grid
-        const offsetX = (canvasWidth - gridSizeX * cellSizeX * 10) / 2;
-        const offsetY = (canvasHeight - gridSizeY * cellSizeY * 10) / 2;
+        const offsetX = (canvasWidth - gridSizeX * baseCellSize) / 2;
+        const offsetY = (canvasHeight - gridSizeY * baseCellSize) / 2;
 
         // Remove existing grid lines
         canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
@@ -98,36 +86,36 @@ const FabricTextComponent = () => {
         // Define grid bounds
         canvas.gridBounds = {
             left: offsetX,
-            right: offsetX + gridSizeX * cellSizeX * 10,
+            right: offsetX + gridSizeX * baseCellSize,
             top: offsetY,
-            bottom: offsetY + gridSizeY * cellSizeY * 10
+            bottom: offsetY + gridSizeY * baseCellSize,
         };
 
-        // Draw vertical lines with scaled length
+        // Draw vertical lines
         for (let i = 0; i <= gridSizeX; i++) {
-            const x = offsetX + i * cellSizeX * 10;
+            const x = offsetX + i * baseCellSize;
             const line = new fabric.Line(
-                [x, offsetY, x, offsetY + gridSizeY * cellSizeY * 10],
+                [x, offsetY, x, offsetY + gridSizeY * baseCellSize],
                 {
                     stroke: "red",
                     strokeWidth: 0.3,
                     selectable: false,
-                    evented: false
+                    evented: false,
                 }
             );
             canvas.add(line);
         }
 
-        // Draw horizontal lines with scaled breadth
+        // Draw horizontal lines
         for (let j = 0; j <= gridSizeY; j++) {
-            const y = offsetY + j * cellSizeY * 10;
+            const y = offsetY + j * baseCellSize;
             const line = new fabric.Line(
-                [offsetX, y, offsetX + gridSizeX * cellSizeX * 10, y],
+                [offsetX, y, offsetX + gridSizeX * baseCellSize, y],
                 {
                     stroke: "red",
                     strokeWidth: 0.3,
                     selectable: false,
-                    evented: false
+                    evented: false,
                 }
             );
             canvas.add(line);
@@ -136,6 +124,7 @@ const FabricTextComponent = () => {
         canvas.renderAll(); // Render everything
     }
 };
+
   const addText = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
