@@ -3,6 +3,7 @@ import * as fabric from "fabric";
 import { BoxSelect, Database, Link, Tag, Type } from "lucide-react";
 import useTShirtStore from "../store/useTShirtStore";
 import './tshirt.css';
+import mytshirt from '../assets/Group 1000002904.png';
 declare module "fabric" {
   interface Canvas {
     gridBounds?: { left: number; right: number; top: number; bottom: number };
@@ -405,9 +406,18 @@ const FabricTextComponent = () => {
       {/* <button onClick={addText} style={{ marginBottom: '10px', marginRight: '10px' }}>Add Text</button>
             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ marginBottom: '10px' }} /> */}
       <div className="flex flex-row  gap-4 pt-8 pr-8">
-        <div className="bg-white px-40 py-8 rounded-xl border ">
-          <div className="tshirt">
-            <canvas id="canvas" width="600" height="500"></canvas>
+        <div className="bg-white px-20 py-8 rounded-xl border ">
+        <div id="tshirt-div" style={{ backgroundColor:'#ffff' , width: '452px', height: '548px', position: 'relative' }}>
+      <img
+        id="tshirt-backgroundpicture"
+        src={mytshirt}
+        alt="T-Shirt"
+        style={{ width: '100%', position: 'absolute' }}
+      />
+      <div className="drawing-area" style={{ position: 'absolute', top: '70px', left: '125px', width: '20px', height: '400px' }}>
+            <canvas id="canvas" width="205" height="258"></canvas>
+            </div>
+            
           </div>
         </div>
         <div className="relative w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">

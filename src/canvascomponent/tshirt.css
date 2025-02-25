@@ -1,4 +1,4 @@
-#canvas {
+/* #canvas {
   width: 500px;
   height: 500px;
   background-image: url("https://i.postimg.cc/GpmQXh9v/Group-1000002904.png");
@@ -7,7 +7,7 @@
   -webkit-background-repeat: no-repeat;
   background-size: cover;
   -webkit-background-size: cover;
-}
+} */
 /* Add this CSS to your styles */
 button:focus {
   outline: none; /* Remove default outline */

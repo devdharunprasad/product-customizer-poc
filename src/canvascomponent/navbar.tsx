@@ -1,28 +1,46 @@
-import { useState } from "react";
-import { Home, Settings, User, Package, Bell } from "lucide-react";
+import  { useEffect, useRef } from 'react';
+import *as fabric from 'fabric';
 
-const Dashboard = () => {
-  const [showOption, setShowOption] = useState(false);
+const TShirtDesigner = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    let canvas: fabric.Canvas | undefined;
+    if (canvasRef.current) {
+      canvas = new fabric.Canvas(canvasRef.current);
+    }
+
+    const text = new fabric.Text('Your Text Here', {
+      left: 50,
+      top: 50,
+      fill: 'black',
+      fontSize: 24,
+    });
+
+    if (canvas) {
+      canvas.add(text);
+    }
+
+    return () => {
+      if (canvas) {
+        canvas.dispose();
+      }
+    };
+  }, []);
 
   return (
-    <div className="h-screen w-20 bg-gray-900 text-white flex flex-col items-center py-5 space-y-6 relative">
-      <Home 
-        className="w-6 h-6 cursor-pointer hover:text-gray-400" 
-        onClick={() => setShowOption(!showOption)}
+    <div id="tshirt-div" style={{ backgroundColor:'#ffff' , width: '452px', height: '548px', position: 'relative' }}>
+      <img
+        id="tshirt-backgroundpicture"
+        src="https://i.postimg.cc/GpmQXh9v/Group-1000002904.png"
+        alt="T-Shirt"
+        style={{ width: '100%', position: 'absolute' }}
       />
-      <Package className="w-6 h-6 cursor-pointer hover:text-gray-400" />
-      <Bell className="w-6 h-6 cursor-pointer hover:text-gray-400" />
-      <User className="w-6 h-6 cursor-pointer hover:text-gray-400" />
-      <Settings className="w-6 h-6 cursor-pointer hover:text-gray-400" />
-      
-      {showOption && (
-        <div className="absolute left-20 top-2 bg-white text-black p-80 rounded-lg shadow-lg">
-          <p>Product Information</p>
-          <p>White Solid T-shirt half sleeves</p>
-        </div>
-      )}
+      <div className="drawing-area" style={{ position: 'absolute', top: '60px', left: '122px', width: '200px', height: '400px' }}>
+        <canvas id="tshirt-canvas" width="200" height="200" ref={canvasRef}></canvas>
+      </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default TShirtDesigner;
