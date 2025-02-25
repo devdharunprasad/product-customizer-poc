@@ -16,72 +16,70 @@ const FabricTextComponent = () => {
       // Initialize Fabric.js canvas
       canvasRef.current = new fabric.Canvas("canvas");     
     }
-    drawGrid('S');    
+    drawGrid();    
       }, []);  
-  const drawGrid = (size: string) => {
-    if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        // Original Length and Breadth (Replace with actual values if needed)
-        type Size = 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL';
-
-        const originalDimensions: Record<Size, number> = {
-          S: 12.75,
-          M: 12.25,
-          L: 11.75,
-          XL: 11.25,
-          "2XL": 10.75,
-          "3XL": 10.25,
-        };
-        
-        const baseCellSize = originalDimensions[size as Size] || 12.75;
-        // Define grid size
-        const gridSizeX = 16;
-        const gridSizeY = 20;
-        const canvasWidth = canvas.getWidth();
-        const canvasHeight = canvas.getHeight();
-        // Offsets for centering the grid
-        const offsetX = (canvasWidth - gridSizeX * baseCellSize) / 2;
-        const offsetY = (canvasHeight - gridSizeY * baseCellSize) / 2;
-        // Remove existing grid lines
-        canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
-        // Define grid bounds
-        canvas.gridBounds = {
-            left: offsetX,
-            right: offsetX + gridSizeX * baseCellSize,
-            top: offsetY,
-            bottom: offsetY + gridSizeY * baseCellSize,
-        };
-        // Draw vertical lines
-        for (let i = 0; i <= gridSizeX; i++) {
-            const x = offsetX + i * baseCellSize;
-            const line = new fabric.Line(
-                [x, offsetY, x, offsetY + gridSizeY * baseCellSize],
-                {
-                    stroke: "red",
-                    strokeWidth: 0.3,
-                    selectable: false,
-                    evented: false,
-                }
-            );
-            canvas.add(line);
+      const drawGrid = () => {
+        if (canvasRef.current) {
+            const canvas = canvasRef.current;
+    
+            // Fixed cell size
+            const baseCellSize = 12.75; // Constant size for all grids
+    
+            // Define grid size
+            const gridSizeX = 16;
+            const gridSizeY = 20;
+    
+            const canvasWidth = canvas.getWidth();
+            const canvasHeight = canvas.getHeight();
+    
+            // Offsets for centering the grid
+            const offsetX = (canvasWidth - gridSizeX * baseCellSize) / 2;
+            const offsetY = (canvasHeight - gridSizeY * baseCellSize) / 2;
+    
+            // Remove existing grid lines
+            canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
+    
+            // Define grid bounds
+            canvas.gridBounds = {
+                left: offsetX,
+                right: offsetX + gridSizeX * baseCellSize,
+                top: offsetY,
+                bottom: offsetY + gridSizeY * baseCellSize,
+            };
+    
+            // Draw vertical lines
+            for (let i = 0; i <= gridSizeX; i++) {
+                const x = offsetX + i * baseCellSize;
+                const line = new fabric.Line(
+                    [x, offsetY, x, offsetY + gridSizeY * baseCellSize],
+                    {
+                        stroke: "red",
+                        strokeWidth: 0.3,
+                        selectable: false,
+                        evented: false,
+                    }
+                );
+                canvas.add(line);
+            }
+    
+            // Draw horizontal lines
+            for (let j = 0; j <= gridSizeY; j++) {
+                const y = offsetY + j * baseCellSize;
+                const line = new fabric.Line(
+                    [offsetX, y, offsetX + gridSizeX * baseCellSize, y],
+                    {
+                        stroke: "red",
+                        strokeWidth: 0.3,
+                        selectable: false,
+                        evented: false,
+                    }
+                );
+                canvas.add(line);
+            }
+    
+            canvas.renderAll(); // Render everything
         }
-        // Draw horizontal lines
-        for (let j = 0; j <= gridSizeY; j++) {
-            const y = offsetY + j * baseCellSize;
-            const line = new fabric.Line(
-                [offsetX, y, offsetX + gridSizeX * baseCellSize, y],
-                {
-                    stroke: "red",
-                    strokeWidth: 0.3,
-                    selectable: false,
-                    evented: false,
-                }
-            );
-            canvas.add(line);
-        }
-        canvas.renderAll(); // Render everything
-    }
-};
+    };
   const addText = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -406,94 +404,88 @@ const FabricTextComponent = () => {
       </div>
       {/* <button onClick={addText} style={{ marginBottom: '10px', marginRight: '10px' }}>Add Text</button>
             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ marginBottom: '10px' }} /> */}
-
       <div className="flex flex-row  gap-4 pt-8 pr-8">
-      <div className="bg-white px-40 py-8 rounded-xl border ">
-        <div className="tshirt">
-          <canvas id="canvas" width="600" height="500"></canvas>
+        <div className="bg-white px-40 py-8 rounded-xl border ">
+          <div className="tshirt">
+            <canvas id="canvas" width="600" height="500"></canvas>
+          </div>
+        </div>
+        <div className="relative w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">
+          <p className="text-lg font-semibold transform -rotate-90">
+            Big Heart
+          </p>
+          <button className="absolute top-2 right-2 bg-white p-2 rounded shadow">
+            &#x2197;
+          </button>
+          <div className="absolute bottom-2 flex space-x-2">
+            <button className="bg-white p-2 rounded shadow">&#x2039;</button>
+            <button className="bg-white p-2 rounded shadow">&#x203A;</button>
+          </div>
         </div>
       </div>
-      <div className="relative w-64 h-64 bg-gray-300 rounded-lg flex items-center justify-center">
-            <p className="text-lg font-semibold transform -rotate-90">
-          Big Heart
-            </p>
-            <button className="absolute top-2 right-2 bg-white p-2 rounded shadow">
-          &#x2197;
-            </button>
-            <div className="absolute bottom-2 flex space-x-2">
-          <button className="bg-white p-2 rounded shadow">
-            &#x2039;
-          </button>
-          <button className="bg-white p-2 rounded shadow">
-            &#x203A;
-          </button>
-            </div>
-      </div>
-      </div>
       <div className="flex  flex-col justify-center w-full">
-  <div className="flex flex-row justify-center pt-4 space-x-2">
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("S")}
-    >
-      S
-    </button>
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("M")}
-    >
-      M
-    </button>
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("L")}
-    >
-      L
-    </button>
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("XL")}
-    >
-      XL
-    </button>
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("2XL")}
-    >
-      2XL
-    </button>
-    <button
-      className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
-      onClick={() => drawGrid("3XL")}
-    >
-      3XL
-    </button>
-  </div>
-  <div className="flex justify-center pt-8">
-    <div className="flex justify-center space-x-4 bg-white rounded-lg border px-10 py-2 w-fit">
-      {[
-        "Front side",
-        "Back side",
-        "Left sleeve",
-        "Right Sleeve",
-        "Pocket",
-      ].map((v: string) => (
-        <button
-          key={v}
-          onClick={() => setView(v)}
-          className={`px-4 py-2 rounded-md ${
-            view === v
-              ? "bg-gray-200 font-bold text-black"
-              : "text-gray-700 hover:text-black"
-          }`}
-        >
-          {v} Side
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
-
+        <div className="flex flex-row justify-center pt-4 space-x-2">
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            S
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            M
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            L
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            XL
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            2XL
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg shadow-sm border transition-all relative z-10"
+            onClick={() => drawGrid()}
+          >
+            3XL
+          </button>
+        </div>
+        <div className="flex justify-center pt-8">
+          <div className="flex justify-center space-x-4 bg-white rounded-lg border px-10 py-2 w-fit">
+            {[
+              "Front side",
+              "Back side",
+              "Left sleeve",
+              "Right Sleeve",
+              "Pocket",
+            ].map((v: string) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-4 py-2 rounded-md ${
+                  view === v
+                    ? "bg-gray-200 font-bold text-black"
+                    : "text-gray-700 hover:text-black"
+                }`}
+              >
+                {v} Side
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-4 p-4">
           <img
