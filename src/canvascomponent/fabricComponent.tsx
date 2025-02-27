@@ -94,7 +94,7 @@ const FabricTextComponent = () => {
       canvas.setActiveObject(text);
       canvas.renderAll();
       setTextObjects((prev) => [...prev, { id, text }]);
-      const infoText = new fabric.Text("", {
+      const infoText = new fabric.FabricText("", {
         left: text.left! + text.width! / 2 + 10,
         top: text.top! - 20,
         fontSize: 14,
@@ -151,8 +151,8 @@ const FabricTextComponent = () => {
     const textHeight = textObj.height! * textObj.scaleY!;
     const minX = bounds.left + textWidth / 2;
     const maxX = bounds.right - textWidth / 2;
-    const minY = bounds.top + textHeight / 2;
-    const maxY = bounds.bottom - textHeight / 2;
+    const minY = bounds.top + textHeight / 3;
+    const maxY = bounds.bottom - textHeight / 3;
     const newLeft = Math.max(minX, Math.min(maxX, textObj.left || 0));
     const newTop = Math.max(minY, Math.min(maxY, textObj.top || 0));
     textObj.set({ left: newLeft, top: newTop });
@@ -264,14 +264,12 @@ const FabricTextComponent = () => {
                 mb: false,
               });
               fabricImg.on("rotating", updateInfoDisplay);
-
               canvas.on("mouse:down", (event) => {
                 if (!event.target || event.target !== fabricImg) {
                   infoText.set({ visible: false });
                   canvas.renderAll();
                 }
               });
-
               updateInfoDisplay();
               canvas.add(fabricImg);
               canvas.renderAll();
@@ -413,7 +411,6 @@ const FabricTextComponent = () => {
           link.href = finalDataURL;
           link.download = "mockup.png";
           link.click();
-
           setTimeout(() => {
             gridLines.forEach((line) => line.set({ visible: true }));
             canvas.renderAll();
@@ -422,6 +419,29 @@ const FabricTextComponent = () => {
       };
     }
   };
+  const downloadMockupAssets = () => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const gridLines = canvas.getObjects().filter((obj) => obj instanceof fabric.Line);
+      gridLines.forEach((line) => line.set({ visible: false }));  
+      canvas.renderAll();  
+      // Download canvas without background
+      const dataURL = canvas.toDataURL({
+        format: "png",
+        quality: 1,
+        multiplier: 1,
+      });  
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = "mockup.png";
+      link.click();  
+      // Restore grid lines and background after download
+      setTimeout(() => {
+        gridLines.forEach((line) => line.set({ visible: true }));
+        canvas.renderAll();
+      }, 100);
+    }
+  };  
   return (
     <div className=" min-h-screen flex flex-col items-center pb-6">
       <div className=" bg-white border border-gray-200 rounded-xl fixed left-20 top-4 w-24 flex flex-col items-center py-6 space-y-8 shadow-md">
@@ -462,10 +482,10 @@ const FabricTextComponent = () => {
         </div>
       </div>
       <div className="flex flex-row  gap-4 pt-8 pr-8">
-        <div className="bg-white px-20 py-8 rounded-xl border ">
+        <div className="bg-white p-8 rounded-xl border ">
           <div
             id="tshirt-div"
-            className="bg-white w-[452px] h-[500px] relative"
+            className="bg-white w-[28.25rem] h-[25.25rem] relative"
           >
             <img
               id="tshirt-backgroundpicture"
@@ -473,7 +493,7 @@ const FabricTextComponent = () => {
               alt="T-Shirt"
               className="w-full absolute"
             />
-            <div className="drawing-area absolute top-[70px] left-[125px] w-[20px] h-[400px]">
+            <div className="drawing-area absolute top-[5.375rem] left-[7.5rem] w-[1.25rem] h-[25rem]">
               <canvas id="canvas" width="205" height="258"></canvas>
             </div>
           </div>
@@ -608,6 +628,7 @@ const FabricTextComponent = () => {
             <p className="text-sm text-gray-700 font-medium">Rs.21.12</p>
           </div>
         </div>
+        <button onClick={downloadMockupAssets}>download</button>
         <button
           onClick={downloadMockup}
           className="bg-gray-900 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 transition"
