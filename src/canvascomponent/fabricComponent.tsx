@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import { BoxSelect, Database, Link, Tag, Type } from "lucide-react";
 import useTShirtStore from "../store/useTShirtStore";
-import './tshirt.css';
-import mytshirt from '../assets/Group 1000002904.png';
+import "./tshirt.css";
+import mytshirt from "../assets/Group 1000002904.png";
 import { CiImageOn } from "react-icons/ci";
 declare module "fabric" {
   interface Canvas {
@@ -12,140 +12,131 @@ declare module "fabric" {
 }
 const FabricTextComponent = () => {
   const canvasRef = useRef<fabric.Canvas | null>(null);
-  const [textObjects, setTextObjects] = useState<{ id: string; text: fabric.IText }[]>([]);
-  const [imageObjects, setImageObjects] = useState<{ id: string; image: fabric.Image }[]>([]);
-  const { view,setView } = useTShirtStore();  
+  const [textObjects, setTextObjects] = useState<
+    { id: string; text: fabric.IText }[]
+  >([]);
+  const [imageObjects, setImageObjects] = useState<
+    { id: string; image: fabric.Image }[]
+  >([]);
+  const { view, setView } = useTShirtStore();
   useEffect(() => {
     if (!canvasRef.current) {
-      // Initialize Fabric.js canvas
-      canvasRef.current = new fabric.Canvas("canvas");     
+      canvasRef.current = new fabric.Canvas("canvas");
     }
-    drawGrid();    
-      }, []);  
-      const drawGrid = () => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current;    
-            // Fixed cell size
-            const baseCellSize = 12.75; // Constant size for all grids    
-            // Define grid size
-            const gridSizeX = 16;
-            const gridSizeY = 20;    
-            const canvasWidth = canvas.getWidth();
-            const canvasHeight = canvas.getHeight();    
-            // Offsets for centering the grid
-            const offsetX = (canvasWidth - gridSizeX * baseCellSize) / 2;
-            const offsetY = (canvasHeight - gridSizeY * baseCellSize) / 2;    
-            // Remove existing grid lines
-            canvas.getObjects("line").forEach((obj) => canvas.remove(obj));    
-            // Define grid bounds
-            canvas.gridBounds = {
-                left: offsetX,
-                right: offsetX + gridSizeX * baseCellSize,
-                top: offsetY,
-                bottom: offsetY + gridSizeY * baseCellSize,
-            };    
-            // Draw vertical lines
-            for (let i = 0; i <= gridSizeX; i++) {
-                const x = offsetX + i * baseCellSize;
-                const line = new fabric.Line(
-                    [x, offsetY, x, offsetY + gridSizeY * baseCellSize],
-                    {
-                        stroke: "red",
-                        strokeWidth: 0.3,
-                        selectable: false,
-                        evented: false,
-                    }
-                );
-                canvas.add(line);
-            }    
-            // Draw horizontal lines
-            for (let j = 0; j <= gridSizeY; j++) {
-                const y = offsetY + j * baseCellSize;
-                const line = new fabric.Line(
-                    [offsetX, y, offsetX + gridSizeX * baseCellSize, y],
-                    {
-                        stroke: "red",
-                        strokeWidth: 0.3,
-                        selectable: false,
-                        evented: false,
-                    }
-                );
-                canvas.add(line);
-            }    
-            canvas.renderAll(); // Render everything
-        }
-    };
-    const addText = () => {
-      if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        const id = `text-${Date.now()}`;
-        const text = new fabric.IText("New Text", {
-          left: canvas.getWidth() / 2,
-          top: canvas.getHeight() / 2,
-          fontSize: 30,
-          fill: "black",
-          editable: true,
-          originX: "center",
-          originY: "center",
-        });    
-        // Disable left, right, top, bottom scaling
-        text.setControlsVisibility({
-          ml: false, 
-          mr: false,
-          mt: false, 
-          mb: false, 
-        });    
-        canvas.add(text);
-        canvas.setActiveObject(text);
-        canvas.renderAll();
-        setTextObjects((prev) => [...prev, { id, text }]);    
-        // Create floating text for size and angle
-        const infoText = new fabric.Text("", {
+    drawGrid();
+  }, []);
+  const drawGrid = () => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const baseCellSize = 12.75;
+      const gridSizeX = 16;
+      const gridSizeY = 20;
+      const canvasWidth = canvas.getWidth();
+      const canvasHeight = canvas.getHeight();
+      const offsetX = (canvasWidth - gridSizeX * baseCellSize) / 2;
+      const offsetY = (canvasHeight - gridSizeY * baseCellSize) / 2;
+      canvas.getObjects("line").forEach((obj) => canvas.remove(obj));
+      canvas.gridBounds = {
+        left: offsetX,
+        right: offsetX + gridSizeX * baseCellSize,
+        top: offsetY,
+        bottom: offsetY + gridSizeY * baseCellSize,
+      };
+      for (let i = 0; i <= gridSizeX; i++) {
+        const x = offsetX + i * baseCellSize;
+        const line = new fabric.Line(
+          [x, offsetY, x, offsetY + gridSizeY * baseCellSize],
+          {
+            stroke: "red",
+            strokeWidth: 0.3,
+            selectable: false,
+            evented: false,
+          }
+        );
+        canvas.add(line);
+      }
+      for (let j = 0; j <= gridSizeY; j++) {
+        const y = offsetY + j * baseCellSize;
+        const line = new fabric.Line(
+          [offsetX, y, offsetX + gridSizeX * baseCellSize, y],
+          {
+            stroke: "red",
+            strokeWidth: 0.3,
+            selectable: false,
+            evented: false,
+          }
+        );
+        canvas.add(line);
+      }
+      canvas.renderAll();
+    }
+  };
+  const addText = () => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const id = `text-${Date.now()}`;
+      const text = new fabric.IText("New Text", {
+        left: canvas.getWidth() / 2,
+        top: canvas.getHeight() / 2,
+        fontSize: 30,
+        fill: "black",
+        editable: true,
+        originX: "center",
+        originY: "center",
+      });
+      text.setControlsVisibility({
+        ml: false,
+        mr: false,
+        mt: false,
+        mb: false,
+      });
+      canvas.add(text);
+      canvas.setActiveObject(text);
+      canvas.renderAll();
+      setTextObjects((prev) => [...prev, { id, text }]);
+      const infoText = new fabric.Text("", {
+        left: text.left! + text.width! / 2 + 10,
+        top: text.top! - 20,
+        fontSize: 14,
+        fill: "red",
+        selectable: false,
+        evented: false,
+      });
+      canvas.add(infoText);
+      const updateInfoDisplay = () => {
+        const width = Math.round(text.getScaledWidth());
+        const height = Math.round(text.getScaledHeight());
+        const angle = Math.round(text.angle!);
+        infoText.set({
+          text: `W: ${width} H: ${height}  Angle: ${angle}°`,
           left: text.left! + text.width! / 2 + 10,
           top: text.top! - 20,
-          fontSize: 14,
-          fill: "red",
-          selectable: false,
-          evented: false,
-        });    
-        canvas.add(infoText);    
-        // Function to update size and rotation info
-        const updateInfoDisplay = () => {
-          const width = Math.round(text.getScaledWidth());
-          const height = Math.round(text.getScaledHeight());
-          const angle = Math.round(text.angle!);
-          infoText.set({
-            text: `W: ${width} H: ${height}  Angle: ${angle}°`,
-            left: text.left! + text.width! / 2 + 10,
-            top: text.top! - 20,
-            visible: true,
-          });
+          visible: true,
+        });
+        canvas.renderAll();
+      };
+      text.on("moving", () => {
+        handleTextMove(text, canvas);
+        updateInfoDisplay();
+      });
+      canvas.on("mouse:down", (event) => {
+        if (!event.target || event.target !== text) {
+          removeGuidelines(canvas);
+          infoText.set({ visible: false });
           canvas.renderAll();
-        };
-            // Attach event listeners
-        text.on("moving", () => {
-          handleTextMove(text, canvas);
-          updateInfoDisplay();
-        });    
-        canvas.on("mouse:down", (event) => {
-          if (!event.target || event.target !== text) {
-            removeGuidelines(canvas);
-            infoText.set({ visible: false }); // Hide the info text
-            canvas.renderAll();
-          }
-        });    
-        text.on("changed", () => {
-          setTextObjects((prev) =>
-            prev.map((obj) => (obj.id === id ? { ...obj, text } : obj))
-          );
-        });    
-        text.on("scaling", updateInfoDisplay);
-        text.on("rotating", updateInfoDisplay);
-        text.on("modified", updateInfoDisplay); // Updates on final modification
-        updateInfoDisplay(); // Initial Update
-      }
-    };
-    
+        }
+      });
+      text.on("changed", () => {
+        setTextObjects((prev) =>
+          prev.map((obj) => (obj.id === id ? { ...obj, text } : obj))
+        );
+      });
+      text.on("scaling", updateInfoDisplay);
+      text.on("rotating", updateInfoDisplay);
+      text.on("modified", updateInfoDisplay);
+      updateInfoDisplay();
+    }
+  };
   interface CustomFabricObject extends fabric.Object {
     customId?: string;
   }
@@ -155,53 +146,46 @@ const FabricTextComponent = () => {
       right: number;
       top: number;
       bottom: number;
-    };  
-    // Calculate text boundaries with scaling
+    };
     const textWidth = textObj.width! * textObj.scaleX!;
     const textHeight = textObj.height! * textObj.scaleY!;
     const minX = bounds.left + textWidth / 2;
     const maxX = bounds.right - textWidth / 2;
     const minY = bounds.top + textHeight / 2;
-    const maxY = bounds.bottom - textHeight / 2;  
-    // Clamp text position within canvas bounds
+    const maxY = bounds.bottom - textHeight / 2;
     const newLeft = Math.max(minX, Math.min(maxX, textObj.left || 0));
-    const newTop = Math.max(minY, Math.min(maxY, textObj.top || 0));  
-    textObj.set({ left: newLeft, top: newTop });  
-    // Remove previous guidelines
-    removeGuidelines(canvas);  
-    // Add new guidelines
+    const newTop = Math.max(minY, Math.min(maxY, textObj.top || 0));
+    textObj.set({ left: newLeft, top: newTop });
+    removeGuidelines(canvas);
     const yGuide = new fabric.Line([newLeft, 0, newLeft, canvas.getHeight()], {
       stroke: "red",
       strokeDashArray: [5, 5],
       selectable: false,
       evented: false,
-    }) as CustomFabricObject;  
+    }) as CustomFabricObject;
     const xGuide = new fabric.Line([0, newTop, canvas.getWidth(), newTop], {
       stroke: "red",
       strokeDashArray: [5, 5],
       selectable: false,
       evented: false,
-    }) as CustomFabricObject;  
+    }) as CustomFabricObject;
     yGuide.customId = "y-guide";
     xGuide.customId = "x-guide";
     canvas.add(yGuide, xGuide);
-    canvas.renderAll();  
-    // Remove guidelines when clicking outside the text object
+    canvas.renderAll();
     canvas.on("mouse:down", (event) => {
       if (!event.target || event.target !== textObj) {
         removeGuidelines(canvas);
       }
     });
-  };  
+  };
   const monitorTextMovement = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       canvas.on("object:moving", (e) => {
         const obj = e.target as fabric.Object;
-        if (!obj || !canvas.gridBounds) return;  
-        // Keep text fully visible even outside the grid
-        obj.set("opacity", 1); 
-  
+        if (!obj || !canvas.gridBounds) return;
+        obj.set("opacity", 1);
         canvas.renderAll();
       });
     }
@@ -211,7 +195,7 @@ const FabricTextComponent = () => {
     if (canvasRef.current && event.target.files) {
       const canvas = canvasRef.current;
       const files = Array.from(event.target.files);
-      if (!canvas.gridBounds) return;  
+      if (!canvas.gridBounds) return;
       files.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -221,8 +205,9 @@ const FabricTextComponent = () => {
             imgObj.onload = () => {
               const id = Date.now().toString();
               const maxDisplaySize = 100;
-              let scaleFactor = maxDisplaySize / Math.max(imgObj.width, imgObj.height);
-              scaleFactor = Math.min(scaleFactor, 1);  
+              let scaleFactor =
+                maxDisplaySize / Math.max(imgObj.width, imgObj.height);
+              scaleFactor = Math.min(scaleFactor, 1);
               const fabricImg = new fabric.FabricImage(imgObj, {
                 scaleX: scaleFactor,
                 scaleY: scaleFactor,
@@ -231,7 +216,6 @@ const FabricTextComponent = () => {
                 lockScalingFlip: true,
               });
               setImageObjects((prev) => [...prev, { id, image: fabricImg }]);
-                // Info Text for displaying width, height, angle
               const infoText = new fabric.FabricText("", {
                 left: 0,
                 top: 0,
@@ -240,55 +224,54 @@ const FabricTextComponent = () => {
                 selectable: false,
                 evented: false,
               });
-              canvas.add(infoText);  
-              // Function to update width, height, angle
+              canvas.add(infoText);
               const updateInfoDisplay = () => {
                 const width = Math.round(fabricImg.getScaledWidth());
                 const height = Math.round(fabricImg.getScaledHeight());
-                const angle = Math.round(fabricImg.angle || 0);  
+                const angle = Math.round(fabricImg.angle || 0);
                 infoText.set({
                   text: `W: ${width} H: ${height} Angle: ${angle}°`,
                   left: fabricImg.left! + width / 2 + 10,
                   top: fabricImg.top! - 20,
                   visible: true,
                 });
-                  canvas.renderAll();
-              };  
+                canvas.renderAll();
+              };
               const gridLeft = canvas.gridBounds!.left;
               const gridRight = canvas.gridBounds!.right;
               const gridTop = canvas.gridBounds!.top;
-              const gridBottom = canvas.gridBounds!.bottom;  
+              const gridBottom = canvas.gridBounds!.bottom;
               const imgWidth = imgObj.width * scaleFactor;
-              const imgHeight = imgObj.height * scaleFactor;  
+              const imgHeight = imgObj.height * scaleFactor;
               const minX = gridLeft + imgWidth / 2;
               const maxX = gridRight - imgWidth / 2;
               const minY = gridTop + imgHeight / 2;
-              const maxY = gridBottom - imgHeight / 2;  
+              const maxY = gridBottom - imgHeight / 2;
               fabricImg.left = Math.random() * (maxX - minX) + minX;
               fabricImg.top = Math.random() * (maxY - minY) + minY;
               fabricImg.on("moving", () => {
                 handleImageMove(fabricImg, canvas);
                 updateInfoDisplay();
-              });  
+              });
               fabricImg.on("scaling", () => {
                 handleImageScaling(fabricImg, canvas);
                 updateInfoDisplay();
-              });  
-              fabricImg.setControlsVisibility({
-                ml: false, 
-                mr: false,
-                mt: false, 
-                mb: false, 
               });
-              fabricImg.on("rotating", updateInfoDisplay);  
-              // Hide info on click outside
+              fabricImg.setControlsVisibility({
+                ml: false,
+                mr: false,
+                mt: false,
+                mb: false,
+              });
+              fabricImg.on("rotating", updateInfoDisplay);
+
               canvas.on("mouse:down", (event) => {
                 if (!event.target || event.target !== fabricImg) {
                   infoText.set({ visible: false });
                   canvas.renderAll();
                 }
-              });  
-              // Initial update
+              });
+
               updateInfoDisplay();
               canvas.add(fabricImg);
               canvas.renderAll();
@@ -298,7 +281,7 @@ const FabricTextComponent = () => {
         reader.readAsDataURL(file);
       });
     }
-  };  
+  };
   const handleImageMove = (imgObj: fabric.Image, canvas: fabric.Canvas) => {
     const bounds = canvas.gridBounds as {
       left: number;
@@ -369,7 +352,10 @@ const FabricTextComponent = () => {
   const removeGuidelines = (canvas: fabric.Canvas) => {
     canvas.getObjects().forEach((obj) => {
       const fabricObj = obj as CustomFabricObject;
-      if (fabricObj.customId === "x-guide" || fabricObj.customId === "y-guide") {
+      if (
+        fabricObj.customId === "x-guide" ||
+        fabricObj.customId === "y-guide"
+      ) {
         canvas.remove(fabricObj);
       }
     });
@@ -399,45 +385,43 @@ const FabricTextComponent = () => {
   };
   const downloadMockup = () => {
     if (canvasRef.current) {
-      const canvas = canvasRef.current;  
-      // Find and hide grid lines before exporting
-      const gridLines = canvas.getObjects().filter(obj => obj instanceof fabric.Line);
-      gridLines.forEach(line => line.set({ visible: false }));
-      canvas.renderAll();  
-      // Load the T-shirt background
+      const canvas = canvasRef.current;
+      const gridLines = canvas
+        .getObjects()
+        .filter((obj) => obj instanceof fabric.Line);
+      gridLines.forEach((line) => line.set({ visible: false }));
+      canvas.renderAll();
       const background = new Image();
-      background.src = mytshirt; // Ensure the T-shirt background image path is correct  
+      background.src = mytshirt;
       background.onload = () => {
-        // Create a temporary canvas to merge everything
         const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = 452; // Match the T-shirt div width
-        tempCanvas.height = 500; // Match the T-shirt div height
-        const ctx = tempCanvas.getContext("2d");  
-        // Step 1: Draw the T-shirt background image on the full-size canvas
-        ctx?.drawImage(background, 0, 0, tempCanvas.width, tempCanvas.height);  
-        // Step 2: Convert Fabric.js canvas to an image and position it correctly
-        const fabricDataURL = canvas.toDataURL({ format: "png", quality: 1, multiplier: 1 });  
+        tempCanvas.width = 452;
+        tempCanvas.height = 500;
+        const ctx = tempCanvas.getContext("2d");
+        ctx?.drawImage(background, 0, 0, tempCanvas.width, tempCanvas.height);
+        const fabricDataURL = canvas.toDataURL({
+          format: "png",
+          quality: 1,
+          multiplier: 1,
+        });
         const overlayImage = new Image();
-        overlayImage.src = fabricDataURL;  
+        overlayImage.src = fabricDataURL;
         overlayImage.onload = () => {
-          // Step 3: Draw the Fabric.js content at the exact drawing area position
-          ctx?.drawImage(overlayImage, 125, 70, 205, 258); // Align with the T-shirt design area  
-          // Step 4: Generate the final merged image
-          const finalDataURL = tempCanvas.toDataURL("image/png");  
-          // Step 5: Create a download link
+          ctx?.drawImage(overlayImage, 125, 70, 205, 258);
+          const finalDataURL = tempCanvas.toDataURL("image/png");
           const link = document.createElement("a");
           link.href = finalDataURL;
-          link.download = "mockup.png"; // Change to "mockup.jpg" for JPG
-          link.click();  
-          // Restore grid lines after download
+          link.download = "mockup.png";
+          link.click();
+
           setTimeout(() => {
-            gridLines.forEach(line => line.set({ visible: true }));
+            gridLines.forEach((line) => line.set({ visible: true }));
             canvas.renderAll();
           }, 100);
         };
       };
     }
-  };     
+  };
   return (
     <div className=" min-h-screen flex flex-col items-center pb-6">
       <div className=" bg-white border border-gray-200 rounded-xl fixed left-20 top-4 w-24 flex flex-col items-center py-6 space-y-8 shadow-md">
@@ -451,7 +435,7 @@ const FabricTextComponent = () => {
             <span className="text-xs mt-1">Layers</span>
           </button>
           <label className="w-full flex flex-col items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">
-          <CiImageOn size={32}/>
+            <CiImageOn size={32} />
             <input
               type="file"
               accept="image/*"
@@ -506,26 +490,46 @@ const FabricTextComponent = () => {
             <button className="bg-white p-2 rounded shadow">&#x203A;</button>
           </div>
         </div>
-        <div style={{ width: '200px', padding: '10px', borderRight: '1px solid #ccc' }}>
-        <h3>Text Elements</h3>
-        {textObjects.map(({ id, text }) => (
-          <div key={id} style={{ marginBottom: '10px' }}>
-            <span>{text.text}</span>
-            <button onClick={() => deleteText(id)} style={{ marginLeft: '10px' }}>
-              Delete
-            </button>
-          </div>
-        ))}</div>
-          <div style={{ width: '200px', padding: '10px', borderRight: '1px solid #ccc' }}>
-        <h3>Image Elements</h3>
-        {imageObjects.map(({ id }) => (
-          <div key={id} style={{ marginBottom: '10px' }}>
-            <span>Image {id.slice(-4)}</span>
-            <button onClick={() => deleteImage(id)} style={{ marginLeft: '10px' }}>
-              Delete
-            </button>
-          </div>
-        ))}</div>
+        <div
+          style={{
+            width: "200px",
+            padding: "10px",
+            borderRight: "1px solid #ccc",
+          }}
+        >
+          <h3>Text Elements</h3>
+          {textObjects.map(({ id, text }) => (
+            <div key={id} style={{ marginBottom: "10px" }}>
+              <span>{text.text}</span>
+              <button
+                onClick={() => deleteText(id)}
+                style={{ marginLeft: "10px" }}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            width: "200px",
+            padding: "10px",
+            borderRight: "1px solid #ccc",
+          }}
+        >
+          <h3>Image Elements</h3>
+          {imageObjects.map(({ id }) => (
+            <div key={id} style={{ marginBottom: "10px" }}>
+              <span>Image {id.slice(-4)}</span>
+              <button
+                onClick={() => deleteImage(id)}
+                style={{ marginLeft: "10px" }}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="flex  flex-col justify-center w-full">
         <div className="flex flex-row justify-center pt-4 space-x-2">
@@ -604,7 +608,10 @@ const FabricTextComponent = () => {
             <p className="text-sm text-gray-700 font-medium">Rs.21.12</p>
           </div>
         </div>
-        <button onClick={downloadMockup} className="bg-gray-900 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 transition">
+        <button
+          onClick={downloadMockup}
+          className="bg-gray-900 text-white text-sm px-4 py-2 rounded-md hover:bg-gray-700 transition"
+        >
           Continue to Mockup
         </button>
       </div>
