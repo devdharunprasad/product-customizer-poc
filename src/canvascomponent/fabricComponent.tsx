@@ -111,8 +111,6 @@ const [imageObjects, setImageObjects] = useState<
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.renderAll();
-  
-    // Function to update a specific text object
     const updateTextObject = () => {
       setTextObjects((prev) =>
         prev.map((obj) =>
@@ -127,9 +125,7 @@ const [imageObjects, setImageObjects] = useState<
         )
       );
     };
-  
-    // Info Text (Not necessary unless you need an overlay label)
-    const infoText = new fabric.Text("", {
+    const infoText = new fabric.FabricText("", {
       left: (text.left ?? 0) + (text.width ?? 0) / 2 + 10,
       top: (text.top ?? 0) - 20,
       fontSize: 14,
@@ -173,32 +169,9 @@ const [imageObjects, setImageObjects] = useState<
     updateTextObject();
   };
   const restrictTextScalingAndRotation = (text, canvas) => {
-    // text.on("scaling", () => {
-    //   const bounds = canvas.gridBounds;
-    //   const scaledWidth = text.width * text.scaleX;
-    //   const scaledHeight = text.height * text.scaleY;
   
-    //   if (
-    //     text.left - scaledWidth / 2 < bounds.left ||
-    //     text.left + scaledWidth / 2 > bounds.right ||
-    //     text.top - scaledHeight / 2 < bounds.top ||
-    //     text.top + scaledHeight / 2 > bounds.bottom
-    //   ) {
-    //     // Prevent scaling outside the grid
-    //     text.scaleX = text.lastValidScaleX || 1;
-    //     text.scaleY = text.lastValidScaleY || 1;
-    //   } else {
-    //     // Store the last valid scale
-    //     text.lastValidScaleX = text.scaleX;
-    //     text.lastValidScaleY = text.scaleY;
-    //   }
-  
-    //   canvas.renderAll();
-    // });
       text.on("rotating", () => {
       const bounds = canvas.gridBounds;
-      // const angle = text.angle || 0;  
-      // Get bounding box after rotation
       const bbox = text.getBoundingRect(true);  
       if (
         bbox.left < bounds.left ||
@@ -387,11 +360,9 @@ interface CustomFabricImage extends fabric.Image {
 }
 const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabric.Canvas) => {
   const bounds = canvas.gridBounds as { left: number; right: number; top: number; bottom: number };
-  // Ensure valid initial values for scaling and rotation
   if (imgObj.lastValidAngle === undefined) imgObj.lastValidAngle = 0;
   if (imgObj.lastValidScaleX === undefined) imgObj.lastValidScaleX = imgObj.scaleX || 1;
   if (imgObj.lastValidScaleY === undefined) imgObj.lastValidScaleY = imgObj.scaleY || 1;
-  // Restrict Rotation
   imgObj.on("rotating", () => {
       const bbox = imgObj.getBoundingRect();
       if (
@@ -400,15 +371,12 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
           bbox.left + bbox.width > bounds.right ||
           bbox.top + bbox.height > bounds.bottom
       ) {
-          // Prevent rotation outside the grid
           imgObj.angle = imgObj.lastValidAngle ?? 0;
       } else {
-          // Store last valid angle
           imgObj.lastValidAngle = imgObj.angle;
       }
       canvas.renderAll();
   });
-  // Restrict Scaling
   imgObj.on("scaling", () => {
       const scaledWidth = imgObj.width! * imgObj.scaleX!;
       const scaledHeight = imgObj.height! * imgObj.scaleY!;
@@ -418,11 +386,9 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
           imgObj.top! - scaledHeight / 2 < bounds.top ||
           imgObj.top! + scaledHeight / 2 > bounds.bottom
       ) {
-          // Prevent scaling outside the grid
           imgObj.scaleX = imgObj.lastValidScaleX ?? 1;
           imgObj.scaleY = imgObj.lastValidScaleY ?? 1;
       } else {
-          // Store last valid scale
           imgObj.lastValidScaleX = imgObj.scaleX!;
           imgObj.lastValidScaleY = imgObj.scaleY!;
       }
@@ -435,7 +401,6 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
     const maxX = bounds.right - imgWidth / 2;
     const minY = bounds.top + imgHeight / 2;
     const maxY = bounds.bottom - imgHeight / 2;
-    // Keep image within boundaries
     imgObj.left = Math.max(minX, Math.min(maxX, imgObj.left!));
     imgObj.top = Math.max(minY, Math.min(maxY, imgObj.top!));
     canvas.renderAll();
@@ -449,16 +414,13 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
       bottom: number;
     };  
     const baseCellSize = 12.75;  
-    // Calculate nearest grid edge positions
     const nearestX = Math.round((imgObj.left! - bounds.left) / baseCellSize) * baseCellSize + bounds.left;
     const nearestY = Math.round((imgObj.top! - bounds.top) / baseCellSize) * baseCellSize + bounds.top;  
-    // Ensure image aligns only to the edges of the grid
     imgObj.set({
       left: nearestX,
       top: nearestY
     });
       removeGuidelines(canvas);  
-    // Create snap guidelines for visual feedback
     const yGuide = new fabric.Line([imgObj.left!, 0, imgObj.left!, canvas.getHeight()], {
       stroke: "blue",
       strokeDashArray: [5, 5],
@@ -484,16 +446,12 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
       bottom: number;
     };  
     const baseCellSize = 12.75;  
-    // Get current scaled dimensions
     const imgWidth = imgObj.width! * imgObj.scaleX!;
     const imgHeight = imgObj.height! * imgObj.scaleY!;  
-    // Snap scaled width/height to ensure it fits **along the edges of multiple grid cells**
     const snappedWidth = Math.ceil(imgWidth / baseCellSize) * baseCellSize;
     const snappedHeight = Math.ceil(imgHeight / baseCellSize) * baseCellSize;  
-    // Update scale factors to align the image with the grid edges
     imgObj.scaleX = snappedWidth / imgObj.width!;
     imgObj.scaleY = snappedHeight / imgObj.height!;  
-    // Adjust position to align with grid edges
     const nearestX = Math.round((imgObj.left! - bounds.left) / baseCellSize) * baseCellSize + bounds.left;
     const nearestY = Math.round((imgObj.top! - bounds.top) / baseCellSize) * baseCellSize + bounds.top;
     imgObj.set({
@@ -501,8 +459,7 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
       top: nearestY
     });  
     removeGuidelines(canvas);  
-    // Draw visual snap guides
-    const yGuide = new fabric.Line([imgObj.left!, 0, imgObj.left!, canvas.getHeight()], {
+      const yGuide = new fabric.Line([imgObj.left!, 0, imgObj.left!, canvas.getHeight()], {
       stroke: "blue",
       strokeDashArray: [5, 5],
       selectable: false,
