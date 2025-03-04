@@ -119,7 +119,7 @@ const FabricTextComponent = () => {
       widthInches: parseFloat(convertToGridCells(text.getScaledWidth())),
       heightInches: parseFloat(convertToGridCells(text.getScaledHeight())),
       angle: text.angle ?? 0,
-      left: text.left ?? 0,
+      left: Math.round(text.left ?? 0),
       top: text.top ?? 0,
     });  
     // Function to update Zustand store on changes
@@ -128,7 +128,7 @@ const FabricTextComponent = () => {
         widthInches: parseFloat(convertToGridCells(text.getScaledWidth())),
         heightInches: parseFloat(convertToGridCells(text.getScaledHeight())),
         angle: Math.round(text.angle ?? 0),
-        left: text.left ?? 0,
+        left: Math.round(text.left ?? 0),
         top: text.top ?? 0,
       });
     };  
@@ -181,8 +181,8 @@ const FabricTextComponent = () => {
     const maxX = bounds.right - textWidth / 2;
     const minY = bounds.top + textHeight / 3;
     const maxY = bounds.bottom - textHeight / 3;
-    const newLeft = Math.max(minX, Math.min(maxX, textObj.left || 0));
-    const newTop = Math.max(minY, Math.min(maxY, textObj.top || 0));
+    const newLeft = Math.round(Math.max(minX, Math.min(maxX, textObj.left || 0)));
+    const newTop = Math.round(Math.max(minY, Math.min(maxY, textObj.top || 0)));
     textObj.set({ left: newLeft, top: newTop });
     removeGuidelines(canvas);
     const yGuide = new fabric.Line([newLeft, 0, newLeft, canvas.getHeight()], {
@@ -207,8 +207,6 @@ const FabricTextComponent = () => {
       }
     });
   };
-// Ensure mouse down event is added only once
-// Removed unused setupGuidelineRemoval function
   const monitorTextMovement = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -360,8 +358,8 @@ const restrictImageScalingAndRotation = (imgObj: CustomFabricImage, canvas: fabr
       const maxX = bounds.right - imgWidth / 2;
       const minY = bounds.top + imgHeight / 2;
       const maxY = bounds.bottom - imgHeight / 2;
-      imgObj.left = Math.max(minX, Math.min(maxX, imgObj.left!));
-      imgObj.top = Math.max(minY, Math.min(maxY, imgObj.top!));
+      imgObj.left = Math.round(Math.max(minX, Math.min(maxX, imgObj.left!)));
+      imgObj.top = Math.round(Math.max(minY, Math.min(maxY, imgObj.top!)));
       canvas.renderAll();
   });
 };
