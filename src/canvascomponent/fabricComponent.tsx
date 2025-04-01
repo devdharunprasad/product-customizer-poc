@@ -88,7 +88,6 @@ const FabricTextComponent = () => {
       canvas.renderAll();
     }
   };
-
   const addText = () => {
     setIsOpen(true);
     if (!canvasRef.current) return;  
@@ -298,7 +297,6 @@ const FabricTextComponent = () => {
     // Reset file input to allow re-uploading the same file
     event.target.value = "";
 };
-
   interface CustomFabricImage extends fabric.Image {
     lastValidAngle?: number;
 }
@@ -737,7 +735,7 @@ const handleImageScaling = (imgObj: fabric.Image, canvas: fabric.Canvas) => {
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-xs font-medium">Rotate</label>
-                    <input type="number" value={text.angle} className="mt-1 w-full border p-1 rounded" />
+                    <input type="number" value={text.angle}  className="mt-1 w-full border p-1 rounded" />
                   </div>
                   <div>
                     <label className="text-xs font-medium">width</label>
