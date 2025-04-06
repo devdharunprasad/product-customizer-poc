@@ -104,7 +104,7 @@ export function BusinessTab() {
         cities: [] as Array<{label: string; value: string}>
     });
 
-    // Load countries on component mount
+    // loading countries on component mount
     useEffect(() => {
         const countries = Country.getAllCountries().map((country: ICountry) => ({
             label: country.name,
@@ -113,7 +113,7 @@ export function BusinessTab() {
         setOptions(prev => ({ ...prev, countries }));
     }, []);
 
-    // Load states when country changes
+    // loading states when country changes
     useEffect(() => {
         if (locationData.country) {
             const states = State.getStatesOfCountry(locationData.country).map((state: IState) => ({
@@ -125,7 +125,7 @@ export function BusinessTab() {
         }
     }, [locationData.country]);
 
-    // Load cities when state changes
+    // loading cities when state changes
     useEffect(() => {
         if (locationData.country && locationData.state) {
             const cities = City.getCitiesOfState(locationData.country, locationData.state).map((city: ICity) => ({
@@ -137,11 +137,8 @@ export function BusinessTab() {
         }
     }, [locationData.country, locationData.state]);
 
-    // Auto-fill pincode when city is selected (this would need to be integrated with a pincode API)
     useEffect(() => {
         if (locationData.city) {
-            // This is a placeholder. You would need to integrate with a pincode API
-            // For now, we'll just clear the pincode to let user enter it manually
             setLocationData(prev => ({ ...prev, pincode: '' }));
         }
     }, [locationData.city]);
@@ -152,7 +149,6 @@ export function BusinessTab() {
 
     const handleLocationChange = (field: keyof LocationData) => (value: string) => {
         setLocationData(prev => ({ ...prev, [field]: value }));
-        // Update the main form data as well
         setInfo(prev => ({ ...prev, [field]: value }));
     };
 

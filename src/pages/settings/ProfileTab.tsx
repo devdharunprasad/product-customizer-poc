@@ -90,7 +90,7 @@ export function ProfileTab() {
     return (
         <div className="p-6 border border-[#E3E3E3] rounded-xl">
             <div className="flex flex-col gap-8">
-                {/* Account Information */}
+                {/* acc info */}
                 <div>
                     <h2 className="text-lg font-bold text-[#303030] mb-6">Account Information</h2>
                     <div className="grid grid-cols-2 gap-6">
@@ -129,7 +129,7 @@ export function ProfileTab() {
                     </div>
                 </div>
 
-                {/* Store Information */}
+                {/* store info */}
                 <div>
                     <div className="flex flex-col gap-2 mb-6">
                         <h2 className="text-lg font-bold text-[#303030]">Store Information</h2>

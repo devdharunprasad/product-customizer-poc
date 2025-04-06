@@ -39,7 +39,6 @@ export function CourierTab() {
                 Courier Information
             </h2>
             <div className="flex flex-col gap-8">
-                {/* Courier Priority Section */}
                 <div className="flex items-center gap-6">
                     <span className="text-sm font-medium text-[#303030]">Courier Priority</span>
                     <div className="flex gap-4">
@@ -56,7 +55,6 @@ export function CourierTab() {
                     </div>
                 </div>
 
-                {/* Shipping Options Section */}
                 <div className="grid grid-cols-3 gap-8">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">

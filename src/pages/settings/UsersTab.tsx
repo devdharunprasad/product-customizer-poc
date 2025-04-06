@@ -28,7 +28,6 @@ export function UsersTab() {
     };
 
     const handleSendInvite = () => {
-        // Handle sending invite logic here
         console.log('Sending invite to:', newUser);
         handleModalClose();
     };
