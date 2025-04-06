@@ -12,6 +12,7 @@
   "dependencies": {
     "@shopify/polaris": "^13.9.5",
     "@tailwindcss/vite": "^4.0.6",
+    "country-state-city": "^3.2.1",
     "dom-to-image": "^2.6.0",
     "fabric": "^6.5.4",
     "konva": "^9.3.18",
